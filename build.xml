@@ -24,7 +24,8 @@
 	<property name="project.testclass.main" value=""/>
 	<property name="project.javadoc.packages" value="
 		com.blackrook.swing,
-		com.blackrook.swing.forms
+		com.blackrook.swing.forms,
+		com.blackrook.swing.table
 		"
 	/>
 	

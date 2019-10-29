@@ -8,6 +8,7 @@ import javax.swing.table.TableRowSorter;
 
 /** 
  * Row sorter implementation. 
+ * @param <T> the stored class type.
  */
 public class JObjectTableRowSorter<T> extends TableRowSorter<JObjectTableModel<T>>
 {

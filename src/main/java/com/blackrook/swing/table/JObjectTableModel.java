@@ -21,8 +21,9 @@ import javax.swing.table.AbstractTableModel;
 /**
  * Table descriptor that describes how to present the data in a table.
  * @author Matthew Tropiano
+ * @param <T> the stored class type.
  */
-public class JObjectTableModel<T extends Object> extends AbstractTableModel implements Iterable<T>
+public class JObjectTableModel<T> extends AbstractTableModel implements Iterable<T>
 {
 	private static final long serialVersionUID = 8496763669872325993L;
 	
@@ -60,8 +61,19 @@ public class JObjectTableModel<T extends Object> extends AbstractTableModel impl
 	}
 
 	/**
+	 * Creates a table descriptor using a base class, inspecting its getter fields.
+	 * @param classType the class type to store.
+	 */
+	public JObjectTableModel(Class<T> classType)
+	{
+		this(classType, new ArrayList<T>());
+	}
+	
+	/**
 	 * Creates a table descriptor using a base class,
 	 * inspecting its getter fields.
+	 * @param classType the class type to store.
+	 * @param backingList the backing list for this model.
 	 */
 	public JObjectTableModel(Class<T> classType, List<T> backingList)
 	{
@@ -141,6 +153,7 @@ public class JObjectTableModel<T extends Object> extends AbstractTableModel impl
 	
 	/**
 	 * Adds rows to this model and fires the appropriate method.
+	 * @param start the starting index to add the objects to.
 	 * @param row the row to add.
 	 */
 	@SuppressWarnings("unchecked")

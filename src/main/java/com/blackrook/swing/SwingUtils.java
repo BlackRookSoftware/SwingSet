@@ -39,6 +39,7 @@ public final class SwingUtils
 	 * Sets the system look and feel.
 	 * If this is not possible, this returns false. 
 	 * Otherwise, this sets the system look and feel and returns true.
+	 * @return true if set, false if not.
 	 */
 	public static boolean setSystemLAF()
 	{
@@ -58,7 +59,7 @@ public final class SwingUtils
 	
 	/**
 	 * Show an alert window.
-	 * @param message	The message to show.
+	 * @param message The message to show.
 	 */
 	public static void error(String message)
 	{
@@ -67,7 +68,7 @@ public final class SwingUtils
 
 	/**
 	 * Show an warning window.
-	 * @param message	The message to show.
+	 * @param message The message to show.
 	 */
 	public static void warning(String message)
 	{
@@ -76,7 +77,7 @@ public final class SwingUtils
 
 	/**
 	 * Show an info window.
-	 * @param message	The message to show.
+	 * @param message The message to show.
 	 */
 	public static void info(String message)
 	{
@@ -85,8 +86,8 @@ public final class SwingUtils
 
 	/**
 	 * Displays a confirmation window asking a user a yes or no question.
-	 * @param message	the message to show.
-	 * @return			true if "yes" was clicked. false otherwise.
+	 * @param message the message to show.
+	 * @return true if "yes" was clicked. false otherwise.
 	 */
 	public static boolean yesTo(String message)
 	{
@@ -96,9 +97,9 @@ public final class SwingUtils
 	/**
 	 * Displays a confirmation window asking a user a yes or no question.
 	 * This is a convenience method for code readability, and is completely
-	 * equivalent to !yesTo(message).
-	 * @param message	the message to show.
-	 * @return			true if "no" was clicked. false otherwise.
+	 * equivalent to <code>!yesTo(message)</code>.
+	 * @param message the message to show.
+	 * @return true if "no" was clicked. false otherwise.
 	 */
 	public static boolean noTo(String message)
 	{
@@ -107,8 +108,8 @@ public final class SwingUtils
 
 	/**
 	 * Show an alert window.
-	 * @param message	The message to show.
-	 * @param parent	Parent component of this dialog.
+	 * @param message The message to show.
+	 * @param parent Parent component of this dialog.
 	 */
 	public static void error(String message, Component parent)
 	{
@@ -120,8 +121,8 @@ public final class SwingUtils
 
 	/**
 	 * Show a warning window.
-	 * @param message	The message to show.
-	 * @param parent	Parent component of this dialog.
+	 * @param message The message to show.
+	 * @param parent Parent component of this dialog.
 	 */
 	public static void warning(String message, Component parent)
 	{
@@ -133,8 +134,8 @@ public final class SwingUtils
 
 	/**
 	 * Show an info window.
-	 * @param message	The message to show.
-	 * @param parent	Parent component of this dialog.
+	 * @param message The message to show.
+	 * @param parent Parent component of this dialog.
 	 */
 	public static void info(String message, Component parent)
 	{
@@ -146,9 +147,9 @@ public final class SwingUtils
 
 	/**
 	 * Displays a confirmation window asking a user a yes or no question.
-	 * @param message	the message to show.
-	 * @param parent	Parent component of this dialog.
-	 * @return			true if "yes" was clicked. false otherwise.
+	 * @param message the message to show.
+	 * @param parent Parent component of this dialog.
+	 * @return true if "yes" was clicked. false otherwise.
 	 */
 	public static boolean yesTo(String message, Component parent)
 	{
@@ -165,10 +166,10 @@ public final class SwingUtils
 	/**
 	 * Displays a confirmation window asking a user a yes or no question.
 	 * This is a convenience method for code readability, and is completely
-	 * equivalent to !yesTo(message,parent).
-	 * @param message	the message to show.
-	 * @param parent	Parent component of this dialog.
-	 * @return			true if "no" was clicked. false otherwise.
+	 * equivalent to <code>!yesTo(message,parent)</code>.
+	 * @param message the message to show.
+	 * @param parent Parent component of this dialog.
+	 * @return true if "no" was clicked. false otherwise.
 	 */
 	public static boolean noTo(String message, Component parent)
 	{
@@ -178,6 +179,8 @@ public final class SwingUtils
 	/**
 	 * Attempts to open a file using the default associated opening program.
 	 * Returns false if unsuccessful, true otherwise.
+	 * @param file the file to open.
+	 * @return true if the file was opened, false if not.
 	 * @throws IOException if the file could not be opened for some reason.
 	 */
 	public static boolean open(File file) throws IOException
@@ -193,6 +196,8 @@ public final class SwingUtils
 	/**
 	 * Attempts to open a location (usually a web browser) for a URI.
 	 * Returns false if unsuccessful, true otherwise.
+	 * @param uri the URI to browse to.
+	 * @return true if the URI was opened, false if not.
 	 * @throws IOException if the URI could not be opened for some reason.
 	 */
 	public static boolean browse(URI uri) throws IOException
@@ -208,6 +213,8 @@ public final class SwingUtils
 	/**
 	 * Attempts to open a mail client for a "mailto" URI.
 	 * Returns false if unsuccessful, true otherwise.
+	 * @param uri the URI to open for mail.
+	 * @return true if the URI was opened, false if not.
 	 * @throws IOException if the URI could not be opened for some reason.
 	 */
 	public static boolean mail(URI uri) throws IOException

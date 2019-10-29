@@ -5,6 +5,7 @@ import java.awt.event.ItemListener;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.swing.Action;
 import javax.swing.BoundedRangeModel;
@@ -22,7 +23,6 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
@@ -38,6 +38,7 @@ import javax.swing.table.TableModel;
 import javax.swing.text.Document;
 
 import com.blackrook.swing.ActionFactory.ActionEventHandler;
+import com.blackrook.swing.forms.JValueTextField;
 
 /**
  * A factory that creates models.
@@ -653,52 +654,39 @@ public final class ComponentFactory
 		return out;
 	}
 	
-	/* ==================================================================== */
-
 	/**
-	 * Input field interface used for the Black Rook Swing input components.
+	 * Creates a new text field that stores a value type.
+	 * @param <T> the type that this field stores.
+	 * @param initialValue the field's initial value.
+	 * @param converter the converter function for input functions.
+	 * @return the generated field.
 	 */
-	public interface JFormField<V>
+	public static <T> JValueTextField<T> valueField(T initialValue, Function<String, T> converter)
 	{
-		/**
-		 * @return the field's value. 
-		 */
-		public V getValue();
-		
-		/**
-		 * Sets the field's value.
-		 * @param value the new value. 
-		 */
-		public void setValue(V value);
-		
+		return new CustomValueTextField<T>(initialValue, converter);
 	}
 
-	private static abstract class JValueTextField<T> extends JTextField implements JFormField<T>
-	{
-		private T value;
-		
-		@Override
-		public void setText(String t)
-		{
-			// TODO Auto-generated method stub
-			super.setText(t);
-		}
+	/* ==================================================================== */
 
-		public abstract T getValueFromText(String value);
+	// Custom field.
+	private static class CustomValueTextField<T> extends JValueTextField<T>
+	{
+		private static final long serialVersionUID = -5644220420764066201L;
 		
-		@Override
-		public T getValue()
+		private Function<String, T> converter;
+		
+		private CustomValueTextField(T initialValue, Function<String, T> converter)
 		{
-			return value;
+			super();
+			this.converter = converter;
+			setValue(initialValue);
 		}
 		
 		@Override
-		public void setValue(T value)
+		public T getValueFromText(String value)
 		{
-			this.value = value;
-			super.setText(value.toString());
+			return converter.apply(value);
 		}
-		
 	}
 	
 }

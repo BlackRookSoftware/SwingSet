@@ -18,7 +18,7 @@ import javax.swing.table.TableRowSorter;
 
 /**
  * A simple table with a row selection policy that displays annotated objects.
- * <p>RTables display and sort their data according to how the class that they store is 
+ * <p>JObjectTable display and sort their data according to how the class that they store is 
  * annotated with {@link JObjectTableColumn} annotations.
  * <p>TableDescriptor annotations are placed on "getter" methods on the stored classes,
  * and only the ones with those annotations will be displayed. How the data is rendered and
@@ -26,8 +26,9 @@ import javax.swing.table.TableRowSorter;
  * <b>editable</b> are if a corresponding "setter" method exists in that annotated class.
  * The setters are NOT annotated.
  * @author Matthew Tropiano
+ * @param <T> the stored class type.
  */
-public class JObjectTable<T extends Object> extends JTable
+public class JObjectTable<T> extends JTable
 {
 	private static final long serialVersionUID = 6409313751355248586L;
 
@@ -105,32 +106,43 @@ public class JObjectTable<T extends Object> extends JTable
 	/**
 	 * Sets a renderer for item cells in the table for a particular column.
 	 * See TableColumn.setCellRenderer().
+	 * @param columnIndex the column index to set the renderer for.
+	 * @param renderer the renderer to set.
+	 * @return itself, for chaining.
 	 */
-	public void setColumnRenderer(int columnIndex, TableCellRenderer renderer)
+	public JObjectTable<T> setColumnRenderer(int columnIndex, TableCellRenderer renderer)
 	{
 		TableColumn col = getColumnModel().getColumn(columnIndex);
 		if (col != null)
 			col.setCellRenderer(renderer);
+		return this;
 	}
 
 	/**
 	 * Sets an editor for item cells in the table for a particular column.
 	 * See TableColumn.setCellEditor().
+	 * @param columnIndex the column index to set the editor for.
+	 * @param editor the editor to set.
+	 * @return itself, for chaining.
 	 */
-	public void setColumnEditor(int columnIndex, TableCellEditor editor)
+	public JObjectTable<T> setColumnEditor(int columnIndex, TableCellEditor editor)
 	{
 		TableColumn col = getColumnModel().getColumn(columnIndex);
 		if (col != null)
 			col.setCellEditor(editor);
+		return this;
 	}
 
 	/**
 	 * Sets a filter for rows in the table.
+	 * @param filter the filter for the rows.
+	 * @return itself, for chaining.
 	 */
 	@SuppressWarnings("unchecked")
-	public void setRowFilter(JObjectTableFilter<T> filter)
+	public JObjectTable<T> setRowFilter(JObjectTableFilter<T> filter)
 	{
 		((TableRowSorter<JObjectTableModel<T>>)getRowSorter()).setRowFilter(filter);
+		return this;
 	}
 
 }
