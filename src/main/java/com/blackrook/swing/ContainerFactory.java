@@ -1,9 +1,8 @@
 /*******************************************************************************
- * Copyright (c) 2009-2019 Black Rook Software
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Lesser Public License v2.1
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * Copyright (c) 2019 Black Rook Software
+ * 
+ * This program and the accompanying materials are made available under 
+ * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
 package com.blackrook.swing;
 
@@ -24,14 +23,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.Border;
 
 /**
- * The main TreeSwing class.
- * TreeSwing is used for creating complex layouts quickly, without the tedium of creating
+ * The main ContainerFactory class.
+ * ContainerFactory is used for creating complex layouts quickly, without the tedium of creating
  * panels and layouts and borders.
  * @author Matthew Tropiano
  */
-public final class TreeSwing
+public final class ContainerFactory
 {
-	private TreeSwing() {}
+	private ContainerFactory() {}
 	
 	/**
 	 * Starts a layout tree, returns a container.
@@ -39,7 +38,7 @@ public final class TreeSwing
 	 * @param edges the component's children.
 	 * @return the component passed in, with the descendants added.
 	 */
-	public static Container treeOf(Container container, Node ... edges)
+	public static Container containerOf(Container container, Node ... edges)
 	{
 		for (Node n : edges)
 			n.addTo(container);
@@ -49,14 +48,15 @@ public final class TreeSwing
 	/**
 	 * Starts a layout tree, returns a component.
 	 * @param layout the layout to use for this tree's children.
-	 * @param root the root node.
+	 * @param edges the component's children.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container treeOf(LayoutManager layout, Node root)
+	public static Container containerOf(LayoutManager layout, Node ... edges)
 	{
 		JPanel out = new JPanel();
 		out.setLayout(layout);
-		root.addTo(out);
+		for (Node n : edges)
+			n.addTo(out);
 		return out;
 	}
 
@@ -65,9 +65,9 @@ public final class TreeSwing
 	 * @param root the root node.
 	 * @return a component that is the result of creating the tree.
 	 */
-	public static Container treeOf(Node root)
+	public static Container containerOf(Node root)
 	{
-		return treeOf(new BorderLayout(), root);
+		return containerOf(new BorderLayout(), root);
 	}
 
 	/**

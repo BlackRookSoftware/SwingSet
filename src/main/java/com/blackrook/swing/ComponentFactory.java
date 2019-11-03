@@ -1,11 +1,17 @@
+/*******************************************************************************
+ * Copyright (c) 2019 Black Rook Software
+ * 
+ * This program and the accompanying materials are made available under 
+ * the terms of the MIT License, which accompanies this distribution.
+ ******************************************************************************/
 package com.blackrook.swing;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.awt.event.ItemListener;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Function;
 
 import javax.swing.Action;
 import javax.swing.BoundedRangeModel;
@@ -23,6 +29,7 @@ import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
@@ -30,6 +37,7 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerListModel;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListDataListener;
 import javax.swing.table.DefaultTableColumnModel;
@@ -38,7 +46,6 @@ import javax.swing.table.TableModel;
 import javax.swing.text.Document;
 
 import com.blackrook.swing.ActionFactory.ActionEventHandler;
-import com.blackrook.swing.forms.JValueTextField;
 
 /**
  * A factory that creates models.
@@ -46,6 +53,49 @@ import com.blackrook.swing.forms.JValueTextField;
  */
 public final class ComponentFactory
 {
+	/**
+	 * A handler interface for listening for action events.
+	 * @param <C> the component type that this handles.
+	 */
+	@FunctionalInterface
+	public interface ComponentActionHandler<C> extends ActionEventHandler
+	{
+		@Override
+		@SuppressWarnings("unchecked")
+		default void handleActionEvent(ActionEvent event)
+		{
+			onActionEvent((C)event.getSource(), event);
+		}
+		
+		/**
+		 * Called when the component emits an action.
+		 * @param component the component on the event.
+		 * @param event the emitted event.
+		 */
+		void onActionEvent(C component, ActionEvent event);
+	}
+	
+	/**
+	 * A handler interface for listening for change events.
+	 * @param <C> the component type that this handles.
+	 */
+	@FunctionalInterface
+	public interface ComponentChangeHandler<C> extends ChangeListener
+	{
+		@Override
+		@SuppressWarnings("unchecked")
+		default void stateChanged(ChangeEvent event)
+		{
+			onChangeEvent((C)event.getSource());
+		}
+		
+		/**
+		 * Called when a component emits a change event.
+		 * @param component the associated component.
+		 */
+		void onChangeEvent(C component);
+	}
+	
 	private ComponentFactory() {}
 	
 	/**
@@ -136,7 +186,7 @@ public final class ComponentFactory
 	 * @param handler the check box label.
 	 * @return a new button.
 	 */
-	public static JButton button(Icon icon, String label, int mnemonic, ActionEventHandler handler)
+	public static JButton button(Icon icon, String label, int mnemonic, ComponentActionHandler<JButton> handler)
 	{
 		JButton out = new JButton(ActionFactory.action(icon, label, handler));
 		if (mnemonic > 0)
@@ -151,7 +201,7 @@ public final class ComponentFactory
 	 * @param handler the check box label.
 	 * @return a new button.
 	 */
-	public static JButton button(Icon icon, String label, ActionEventHandler handler)
+	public static JButton button(Icon icon, String label, ComponentActionHandler<JButton> handler)
 	{
 		return button(icon, label, 0, handler);
 	}
@@ -163,7 +213,7 @@ public final class ComponentFactory
 	 * @param handler the check box label.
 	 * @return a new button.
 	 */
-	public static JButton button(Icon icon, int mnemonic, ActionEventHandler handler)
+	public static JButton button(Icon icon, int mnemonic, ComponentActionHandler<JButton> handler)
 	{
 		return button(icon, null, 0, handler);
 	}
@@ -174,7 +224,7 @@ public final class ComponentFactory
 	 * @param handler the check box label.
 	 * @return a new button.
 	 */
-	public static JButton button(Icon icon, ActionEventHandler handler)
+	public static JButton button(Icon icon, ComponentActionHandler<JButton> handler)
 	{
 		return button(icon, 0, handler);
 	}
@@ -186,7 +236,7 @@ public final class ComponentFactory
 	 * @param handler the check box label.
 	 * @return a new button.
 	 */
-	public static JButton button(String label, int mnemonic, ActionEventHandler handler)
+	public static JButton button(String label, int mnemonic, ComponentActionHandler<JButton> handler)
 	{
 		return button(null, label, 0, handler);
 	}
@@ -197,7 +247,7 @@ public final class ComponentFactory
 	 * @param handler the check box label.
 	 * @return a new button.
 	 */
-	public static JButton button(String label, ActionEventHandler handler)
+	public static JButton button(String label, ComponentActionHandler<JButton> handler)
 	{
 		return button(label, 0, handler);
 	}
@@ -225,7 +275,7 @@ public final class ComponentFactory
 	 * @param handler the check box label.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(Icon icon, String label, boolean selected, ActionEventHandler handler)
+	public static JCheckBox checkBox(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
 	{
 		JCheckBox out = new JCheckBox(ActionFactory.action(icon, label, handler));
 		out.setSelected(selected);
@@ -239,7 +289,7 @@ public final class ComponentFactory
 	 * @param handler the check box label.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(String label, boolean selected, ActionEventHandler handler)
+	public static JCheckBox checkBox(String label, boolean selected, ComponentActionHandler<JCheckBox> handler)
 	{
 		JCheckBox out = new JCheckBox(ActionFactory.action(label, handler));
 		out.setSelected(selected);
@@ -253,7 +303,7 @@ public final class ComponentFactory
 	 * @param handler the check box label.
 	 * @return a new check box.
 	 */
-	public static JCheckBox checkBox(Icon icon, boolean selected, ActionEventHandler handler)
+	public static JCheckBox checkBox(Icon icon, boolean selected, ComponentActionHandler<JCheckBox> handler)
 	{
 		JCheckBox out = new JCheckBox(ActionFactory.action(icon, handler));
 		out.setSelected(selected);
@@ -266,28 +316,28 @@ public final class ComponentFactory
 	 * Creates a value slider.
 	 * @param orientation the orientation type.
 	 * @param rangeModel the range model for the slider.
-	 * @param listener the change listener.
+	 * @param handler the change handler.
 	 * @return a new slider.
 	 */
-	public static JSlider slider(int orientation, BoundedRangeModel rangeModel, ChangeListener listener)
+	public static JSlider slider(int orientation, BoundedRangeModel rangeModel, ComponentChangeHandler<JSlider> handler)
 	{
 		JSlider out = new JSlider(rangeModel);
 		out.setOrientation(orientation);
-		out.addChangeListener(listener);
+		out.addChangeListener(handler);
 		return out;
 	}
 	
 	/**
 	 * Creates a horizontal value slider.
 	 * @param rangeModel the range model for the slider.
-	 * @param listener the change listener.
+	 * @param handler the change handler.
 	 * @return a new slider.
 	 */
-	public static JSlider slider(BoundedRangeModel rangeModel, ChangeListener listener)
+	public static JSlider slider(BoundedRangeModel rangeModel, ComponentChangeHandler<JSlider> handler)
 	{
 		JSlider out = new JSlider(rangeModel);
 		out.setOrientation(JSlider.HORIZONTAL);
-		out.addChangeListener(listener);
+		out.addChangeListener(handler);
 		return out;
 	}
 	
@@ -345,15 +395,69 @@ public final class ComponentFactory
 	/* ==================================================================== */
 
 	/**
+	 * Creates a new TextField.
+	 * @param document the backing document model.
+	 * @param text the default starting text contained.
+	 * @param columns the amount of columns.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(Document document, String text, int columns)
+	{
+		return new JTextField(document, text, columns);
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param text the default starting text contained.
+	 * @param columns the amount of columns.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(String text, int columns)
+	{
+		return new JTextField(text, columns);
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param columns the amount of columns.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(int columns)
+	{
+		return new JTextField(columns);
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param text the default starting text contained.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(String text)
+	{
+		return new JTextField(text);
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @return a new text field.
+	 */
+	public static JTextField textField()
+	{
+		return new JTextField();
+	}
+
+	/* ==================================================================== */
+
+	/**
 	 * Creates a value spinner with an attached change listener.
 	 * @param model the spinner model.
-	 * @param listener the change listener.
+	 * @param handler the change handler.
 	 * @return the resultant spinner.
 	 */
-	public static JSpinner spinner(SpinnerModel model, ChangeListener listener)
+	public static JSpinner spinner(SpinnerModel model, ComponentChangeHandler<JSpinner> handler)
 	{
 		JSpinner out = new JSpinner(model);
-		out.addChangeListener(listener);
+		out.addChangeListener(handler);
 		return out;
 	}
 
@@ -652,41 +756,6 @@ public final class ComponentFactory
 		JTable out = new JTable(model, new DefaultTableColumnModel());
 		out.setSelectionMode(selectionMode);
 		return out;
-	}
-	
-	/**
-	 * Creates a new text field that stores a value type.
-	 * @param <T> the type that this field stores.
-	 * @param initialValue the field's initial value.
-	 * @param converter the converter function for input functions.
-	 * @return the generated field.
-	 */
-	public static <T> JValueTextField<T> valueField(T initialValue, Function<String, T> converter)
-	{
-		return new CustomValueTextField<T>(initialValue, converter);
-	}
-
-	/* ==================================================================== */
-
-	// Custom field.
-	private static class CustomValueTextField<T> extends JValueTextField<T>
-	{
-		private static final long serialVersionUID = -5644220420764066201L;
-		
-		private Function<String, T> converter;
-		
-		private CustomValueTextField(T initialValue, Function<String, T> converter)
-		{
-			super();
-			this.converter = converter;
-			setValue(initialValue);
-		}
-		
-		@Override
-		public T getValueFromText(String value)
-		{
-			return converter.apply(value);
-		}
 	}
 	
 }

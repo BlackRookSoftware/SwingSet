@@ -5,13 +5,13 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
 
-import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JMenuItem;
 import javax.swing.JSlider;
 
-import static com.blackrook.swing.TreeSwing.*;
+import static com.blackrook.swing.ContainerFactory.*;
 import static com.blackrook.swing.MenuFactory.*;
-import static com.blackrook.swing.ActionFactory.*;
 import static com.blackrook.swing.ComponentFactory.*;
 
 public final class TreeSwingTest
@@ -20,47 +20,45 @@ public final class TreeSwingTest
 	{
 		SwingUtils.setSystemLAF();
 		
-		ActionEventHandler BLANK = (e)->{};
+		ComponentActionHandler<JMenuItem> PRINT_MENUITEM_NAME = (x, e)->{
+			System.out.println(x.getText());
+		};
+		
+		ComponentActionHandler<JButton> BUTTON_NAME_PRINTER = (b, e)->{
+			System.out.println(b.getText());
+		};
+		
+		ComponentChangeHandler<JSlider> SLIDER_VALUE_PRINTER = (s)->{
+			if (s.getValueIsAdjusting())
+				System.out.println(s.getValue());
+		};
 		
 		JFrame f = frame("Test",
 			menuBar(
 				menu("File", KeyEvent.VK_F,
-					item("New", KeyEvent.VK_N, BLANK),
-					item("Open", KeyEvent.VK_O, BLANK),
+					item("New", KeyEvent.VK_N, PRINT_MENUITEM_NAME),
+					item("Open", KeyEvent.VK_O, PRINT_MENUITEM_NAME),
 					separator(),
-					item("Exit", KeyEvent.VK_X, BLANK)
+					item("Exit", KeyEvent.VK_X, PRINT_MENUITEM_NAME)
 				),
 				menu("Edit", KeyEvent.VK_E,
 					item("Stuff", KeyEvent.VK_S,
-						item("Junk", KeyEvent.VK_J, BLANK),
-						item("Crud", KeyEvent.VK_C, BLANK),
-						checkBoxItem("Option", false, KeyEvent.VK_O, (e)->{
-							JCheckBoxMenuItem item = (JCheckBoxMenuItem)e.getSource();
+						item("Junk", KeyEvent.VK_J, PRINT_MENUITEM_NAME),
+						item("Crud", KeyEvent.VK_C, PRINT_MENUITEM_NAME),
+						checkBoxItem("Option", false, KeyEvent.VK_O, (item, e)->{
 							System.out.println(item.getState());
 						})
 					)
 				)
 			),
-			treeOf(
+			containerOf(
 				node(new Dimension(256, 256), new BorderLayout(),
-					node(BorderLayout.NORTH, button("OK", (e)->{
-						System.out.println("OK");
-					})),
+					node(BorderLayout.NORTH, button("OK", BUTTON_NAME_PRINTER)),
 					node(BorderLayout.CENTER, new FlowLayout(),
-						node(slider(sliderModel(50, 0, 0, 100), (e)->{
-							JSlider slider = (JSlider)e.getSource();
-							if (slider.getValueIsAdjusting())
-								System.out.println(slider.getValue());
-						})),
-						node(slider(sliderModel(50, 0, 0, 100), (e)->{
-							JSlider slider = (JSlider)e.getSource();
-							if (slider.getValueIsAdjusting())
-								System.out.println(slider.getValue());
-						}))
+						node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
+						node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER))
 					),
-					node(BorderLayout.SOUTH, button("Cancel", (e)->{
-						System.out.println("Cancel");
-					}))
+					node(BorderLayout.SOUTH, button("Cancel", BUTTON_NAME_PRINTER))
 				)
 			)
 		);

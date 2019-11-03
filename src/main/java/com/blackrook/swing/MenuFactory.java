@@ -1,3 +1,9 @@
+/*******************************************************************************
+ * Copyright (c) 2019 Black Rook Software
+ * 
+ * This program and the accompanying materials are made available under 
+ * the terms of the MIT License, which accompanies this distribution.
+ ******************************************************************************/
 package com.blackrook.swing;
 
 import javax.swing.Action;
@@ -9,7 +15,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 
-import com.blackrook.swing.ActionFactory.ActionEventHandler;
+import com.blackrook.swing.ComponentFactory.ComponentActionHandler;
 
 /**
  * A factory that creates menus.
@@ -110,7 +116,7 @@ public final class MenuFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a new JMenu.
 	 */
-	public static JMenu menu(Icon icon, String label, int mnemonic, ActionEventHandler handler)
+	public static JMenu menu(Icon icon, String label, int mnemonic, ComponentActionHandler<JMenu> handler)
 	{
 		JMenu out = new JMenu(ActionFactory.action(icon, label, handler));
 		out.setMnemonic(mnemonic);
@@ -170,7 +176,7 @@ public final class MenuFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(Icon icon, String label, int mnemonic, KeyStroke accelerator, ActionEventHandler handler)
+	public static MenuNode item(Icon icon, String label, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
 		return new MenuItemNode(ActionFactory.action(icon, label, handler), mnemonic, accelerator);
 	}
@@ -183,7 +189,7 @@ public final class MenuFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(String label, int mnemonic, KeyStroke accelerator, ActionEventHandler handler)
+	public static MenuNode item(String label, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
 		return new MenuItemNode(ActionFactory.action(label, handler), mnemonic, accelerator);
 	}
@@ -196,7 +202,7 @@ public final class MenuFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(Icon icon, String label, int mnemonic, ActionEventHandler handler)
+	public static MenuNode item(Icon icon, String label, int mnemonic, ComponentActionHandler<JMenuItem> handler)
 	{
 		return new MenuItemNode(ActionFactory.action(icon, label, handler), mnemonic, null);
 	}
@@ -208,7 +214,7 @@ public final class MenuFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(String label, int mnemonic, ActionEventHandler handler)
+	public static MenuNode item(String label, int mnemonic, ComponentActionHandler<JMenuItem> handler)
 	{
 		return new MenuItemNode(ActionFactory.action(label, handler), mnemonic, null);
 	}
@@ -221,7 +227,7 @@ public final class MenuFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(Icon icon, String label, KeyStroke accelerator, ActionEventHandler handler)
+	public static MenuNode item(Icon icon, String label, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
 		return new MenuItemNode(ActionFactory.action(icon, label, handler), 0, accelerator);
 	}
@@ -233,7 +239,7 @@ public final class MenuFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(String label, KeyStroke accelerator, ActionEventHandler handler)
+	public static MenuNode item(String label, KeyStroke accelerator, ComponentActionHandler<JMenuItem> handler)
 	{
 		return new MenuItemNode(ActionFactory.action(label, handler), 0, accelerator);
 	}
@@ -245,7 +251,7 @@ public final class MenuFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(Icon icon, String label, ActionEventHandler handler)
+	public static MenuNode item(Icon icon, String label, ComponentActionHandler<JMenuItem> handler)
 	{
 		return new MenuItemNode(ActionFactory.action(icon, label, handler), 0, null);
 	}
@@ -256,7 +262,7 @@ public final class MenuFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a menu node.
 	 */
-	public static MenuNode item(String label, ActionEventHandler handler)
+	public static MenuNode item(String label, ComponentActionHandler<JMenuItem> handler)
 	{
 		return new MenuItemNode(ActionFactory.action(label, handler), 0, null);
 	}
@@ -367,7 +373,7 @@ public final class MenuFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, KeyStroke accelerator, ActionEventHandler handler)
+	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
 		return new MenuCheckBoxNode(ActionFactory.action(icon, label, handler), selected, mnemonic, accelerator);
 	}
@@ -381,7 +387,7 @@ public final class MenuFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, KeyStroke accelerator, ActionEventHandler handler)
+	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
 		return new MenuCheckBoxNode(ActionFactory.action(label, handler), selected, mnemonic, accelerator);
 	}
@@ -395,7 +401,7 @@ public final class MenuFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, ActionEventHandler handler)
+	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
 		return new MenuCheckBoxNode(ActionFactory.action(icon, label, handler), selected, mnemonic, null);
 	}
@@ -408,7 +414,7 @@ public final class MenuFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, ActionEventHandler handler)
+	public static MenuNode checkBoxItem(String label, boolean selected, int mnemonic, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
 		return new MenuCheckBoxNode(ActionFactory.action(label, handler), selected, mnemonic, null);
 	}
@@ -422,7 +428,7 @@ public final class MenuFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, KeyStroke accelerator, ActionEventHandler handler)
+	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
 		return new MenuCheckBoxNode(ActionFactory.action(icon, label, handler), selected, 0, accelerator);
 	}
@@ -435,7 +441,7 @@ public final class MenuFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(String label, boolean selected, KeyStroke accelerator, ActionEventHandler handler)
+	public static MenuNode checkBoxItem(String label, boolean selected, KeyStroke accelerator, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
 		return new MenuCheckBoxNode(ActionFactory.action(label, handler), selected, 0, accelerator);
 	}
@@ -448,7 +454,7 @@ public final class MenuFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, ActionEventHandler handler)
+	public static MenuNode checkBoxItem(Icon icon, String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
 		return new MenuCheckBoxNode(ActionFactory.action(icon, label, handler), selected, 0, null);
 	}
@@ -460,7 +466,7 @@ public final class MenuFactory
 	 * @param handler the change handler to add.
 	 * @return a menu node.
 	 */
-	public static MenuNode checkBoxItem(String label, boolean selected, ActionEventHandler handler)
+	public static MenuNode checkBoxItem(String label, boolean selected, ComponentActionHandler<JCheckBoxMenuItem> handler)
 	{
 		return new MenuCheckBoxNode(ActionFactory.action(label, handler), selected, 0, null);
 	}

@@ -1,3 +1,9 @@
+/*******************************************************************************
+ * Copyright (c) 2019 Black Rook Software
+ * 
+ * This program and the accompanying materials are made available under 
+ * the terms of the MIT License, which accompanies this distribution.
+ ******************************************************************************/
 package com.blackrook.swing;
 
 import java.awt.event.ActionEvent;
@@ -12,6 +18,19 @@ import javax.swing.Icon;
  */
 public final class ActionFactory
 {
+	/**
+	 * An action handler that is called when an action is performed.
+	 */
+	@FunctionalInterface
+	public interface ActionEventHandler
+	{
+		/**
+		 * Called when an action event happens.
+		 * @param e the ActionEvent.
+		 */
+	    void handleActionEvent(ActionEvent e);
+	}
+
 	private ActionFactory() {}
 
 	/**
@@ -50,19 +69,6 @@ public final class ActionFactory
 
 	/* ==================================================================== */
 	
-	/**
-	 * An action handler that is called when an action is performed.
-	 */
-	@FunctionalInterface
-	public interface ActionEventHandler
-	{
-		/**
-		 * Called when an action event happens.
-		 * @param e the ActionEvent.
-		 */
-	    void handleActionEvent(ActionEvent e);
-	}
-
 	/**
 	 * The action generated from an action call.
 	 */
