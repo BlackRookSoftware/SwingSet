@@ -574,7 +574,8 @@ public final class ComponentFactory
 	public static <E> ComboBoxModel<E> comboBoxModel(Collection<E> objects, ListDataListener listener)
 	{
 		DefaultComboBoxModel<E> out = new DefaultComboBoxModel<E>();
-		out.addAll(objects);
+		for (E e : objects)
+			out.addElement(e);
 		out.addListDataListener(listener);
 		return out;
 	}
@@ -588,7 +589,8 @@ public final class ComponentFactory
 	public static <E> ComboBoxModel<E> comboBoxModel(Collection<E> objects)
 	{
 		DefaultComboBoxModel<E> out = new DefaultComboBoxModel<E>();
-		out.addAll(objects);
+		for (E e : objects)
+			out.addElement(e);
 		return out;
 	}
 
@@ -677,7 +679,8 @@ public final class ComponentFactory
 	public static <E> ListModel<E> listModel(Collection<E> objects, ListDataListener listener)
 	{
 		DefaultListModel<E> out = new DefaultListModel<E>();
-		out.addAll(objects);
+		for (E e : objects)
+			out.addElement(e);
 		out.addListDataListener(listener);
 		return out;
 	}
@@ -691,7 +694,8 @@ public final class ComponentFactory
 	public static <E> ListModel<E> listModel(Collection<E> objects)
 	{
 		DefaultListModel<E> out = new DefaultListModel<E>();
-		out.addAll(objects);
+		for (E e : objects)
+			out.addElement(e);
 		return out;
 	}
 
