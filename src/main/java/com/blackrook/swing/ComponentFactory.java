@@ -543,6 +543,7 @@ public final class ComponentFactory
 
 	/**
 	 * Creates a combo box (dropdown) with an attached listener.
+	 * @param <E> the item type.
 	 * @param model the spinner model.
 	 * @param listener the change listener.
 	 * @return the resultant spinner.
@@ -556,6 +557,7 @@ public final class ComponentFactory
 
 	/**
 	 * Creates a combo box (dropdown).
+	 * @param <E> the item type.
 	 * @param model the spinner model.
 	 * @return the resultant spinner.
 	 */

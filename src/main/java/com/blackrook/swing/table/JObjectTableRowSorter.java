@@ -147,10 +147,11 @@ public class JObjectTableRowSorter<T> extends TableRowSorter<JObjectTableModel<T
 	 * Sets a comparator to use when sorting a column.
 	 * <p>These comparators are resolved by the column's primary class first,
 	 * and then its hierarchy is recursively searched if it is not found.
+	 * @param <E> the item type.
 	 * @param clazz the class to assign a comparator to.
 	 * @param comparator the comparator.
 	 */
-	public <E extends Object> void setClassComparator(Class<E> clazz, Comparator<E> comparator)
+	public <E> void setClassComparator(Class<E> clazz, Comparator<E> comparator)
 	{
 		classComparatorMap.put(clazz, comparator);
 	}
