@@ -287,7 +287,7 @@ public final class ContainerFactory
 
 	/**
 	 * Creates a split pane.
-	 * @param orientation the split orientation.
+	 * @param orientation the split orientation (from JSplitPane).
 	 * @param continuousLayout if true, this renders as the size is adjusted.
 	 * @param first the first component.
 	 * @param second the second component.
@@ -300,7 +300,7 @@ public final class ContainerFactory
 
 	/**
 	 * Creates a split pane.
-	 * @param orientation the split orientation.
+	 * @param orientation the split orientation (from JSplitPane).
 	 * @param first the first component.
 	 * @param second the second component.
 	 * @return a new split pane.
@@ -314,8 +314,8 @@ public final class ContainerFactory
 
 	/**
 	 * Creates a scrolling pane.
-	 * @param vsbPolicy the vertical scroll policy.
-	 * @param hsbPolicy the horizontal scroll policy.
+	 * @param vsbPolicy the vertical scroll policy (from JScrollPane).
+	 * @param hsbPolicy the horizontal scroll policy (from JScrollPane).
 	 * @param component the component to add to the scroller. 
 	 * @return a scroll pane.
 	 */
@@ -326,7 +326,7 @@ public final class ContainerFactory
 
 	/**
 	 * Creates a scrolling pane.
-	 * @param vsbPolicy the vertical scroll policy.
+	 * @param vsbPolicy the vertical scroll policy (from JScrollPane).
 	 * @param container the container 
 	 * @return a scroll pane.
 	 */

@@ -618,7 +618,7 @@ public final class ComponentFactory
 	 * Creates a list with a specific list model.
 	 * @param <E> the object type that the model contains.
 	 * @param renderer the cell renderer.
-	 * @param selectionMode the list selection mode.
+	 * @param selectionMode the list selection mode (from ListSelectionModel).
 	 * @param model the list model.
 	 * @return the list component.
 	 */
@@ -647,7 +647,7 @@ public final class ComponentFactory
 	/**
 	 * Creates a list with a specific list model.
 	 * @param <E> the object type that the model contains.
-	 * @param selectionMode the list selection mode.
+	 * @param selectionMode the list selection mode (from ListSelectionModel).
 	 * @param model the list model.
 	 * @return the list component.
 	 */
@@ -717,7 +717,7 @@ public final class ComponentFactory
 	
 	/**
 	 * Creates a new table.
-	 * @param selectionMode the list selection mode.
+	 * @param selectionMode the list selection mode (from ListSelectionModel).
 	 * @param columnModel the column model.
 	 * @param model the table model.
 	 * @return the table created.
@@ -753,7 +753,7 @@ public final class ComponentFactory
 	
 	/**
 	 * Creates a new table.
-	 * @param selectionMode the list selection mode.
+	 * @param selectionMode the list selection mode (from ListSelectionModel).
 	 * @param model the table model.
 	 * @return the table created.
 	 */
