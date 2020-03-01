@@ -109,14 +109,15 @@ public final class ComponentFactory
 		@SuppressWarnings("unchecked")
 		default void valueChanged(ListSelectionEvent e) 
 		{
-			onSelectionChange((L)e.getSource());
+			onSelectionChange((L)e.getSource(), e);
 		}
 		
 		/**
 		 * Called when a list's selection changes.
 		 * @param component the associated component.
+		 * @param e the event.
 		 */
-		void onSelectionChange(L component);
+		void onSelectionChange(L component, ListSelectionEvent e);
 	}
 	
 	private ComponentFactory() {}
