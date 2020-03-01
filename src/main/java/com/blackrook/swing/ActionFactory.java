@@ -42,7 +42,7 @@ public final class ActionFactory
 	 */
 	public static Action action(Icon icon, String label, ActionEventHandler handler)
 	{
-		return new TreeSwingAction(icon, label, handler);
+		return new HandledAction(icon, label, handler);
 	}
 
 	/**
@@ -53,7 +53,7 @@ public final class ActionFactory
 	 */
 	public static Action action(String label, ActionEventHandler handler)
 	{
-		return new TreeSwingAction(null, label, handler);
+		return new HandledAction(null, label, handler);
 	}
 
 	/**
@@ -64,7 +64,7 @@ public final class ActionFactory
 	 */
 	public static Action action(Icon icon, ActionEventHandler handler)
 	{
-		return new TreeSwingAction(icon, null, handler);
+		return new HandledAction(icon, null, handler);
 	}
 
 	/* ==================================================================== */
@@ -72,13 +72,13 @@ public final class ActionFactory
 	/**
 	 * The action generated from an action call.
 	 */
-	private static class TreeSwingAction extends AbstractAction
+	private static class HandledAction extends AbstractAction
 	{
 		private static final long serialVersionUID = 7014730121602528947L;
 		
 		private ActionEventHandler handler;
 	
-	    private TreeSwingAction(Icon icon, String label, ActionEventHandler handler)
+	    private HandledAction(Icon icon, String label, ActionEventHandler handler)
 	    {
 	    	super(label, icon);
 	    	this.handler = handler;

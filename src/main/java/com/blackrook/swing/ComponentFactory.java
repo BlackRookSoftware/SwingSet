@@ -40,6 +40,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListDataListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -94,6 +96,27 @@ public final class ComponentFactory
 		 * @param component the associated component.
 		 */
 		void onChangeEvent(C component);
+	}
+	
+	/**
+	 * A handler interface for listening for list selection events.
+	 * @param <L> the listener type that this handles.
+	 */
+	@FunctionalInterface
+	public interface ListSelectionHandler<L> extends ListSelectionListener
+	{
+		@Override
+		@SuppressWarnings("unchecked")
+		default void valueChanged(ListSelectionEvent e) 
+		{
+			onSelectionChange((L)e.getSource());
+		}
+		
+		/**
+		 * Called when a list's selection changes.
+		 * @param component the associated component.
+		 */
+		void onSelectionChange(L component);
 	}
 	
 	private ComponentFactory() {}
@@ -313,6 +336,19 @@ public final class ComponentFactory
 	/* ==================================================================== */
 
 	/**
+	 * Creates a new range model for a slider.
+	 * @param value the current value.
+	 * @param extent the length of the inner range that begins at the model's value.
+	 * @param min the minimum value.
+	 * @param max the maximum value.
+	 * @return a new range model.
+	 */
+	public static BoundedRangeModel sliderModel(int value, int extent, int min, int max)
+	{
+		return new DefaultBoundedRangeModel(value, extent, min, max);
+	}
+
+	/**
 	 * Creates a value slider.
 	 * @param orientation the orientation type.
 	 * @param rangeModel the range model for the slider.
@@ -341,18 +377,7 @@ public final class ComponentFactory
 		return out;
 	}
 	
-	/**
-	 * Creates a new range model for a slider.
-	 * @param value the current value.
-	 * @param extent the length of the inner range that begins at the model's value.
-	 * @param min the minimum value.
-	 * @param max the maximum value.
-	 * @return a new range model.
-	 */
-	public static BoundedRangeModel sliderModel(int value, int extent, int min, int max)
-	{
-		return new DefaultBoundedRangeModel(value, extent, min, max);
-	}
+	
 	
 	/* ==================================================================== */
 
@@ -449,19 +474,6 @@ public final class ComponentFactory
 	/* ==================================================================== */
 
 	/**
-	 * Creates a value spinner with an attached change listener.
-	 * @param model the spinner model.
-	 * @param handler the change handler.
-	 * @return the resultant spinner.
-	 */
-	public static JSpinner spinner(SpinnerModel model, ComponentChangeHandler<JSpinner> handler)
-	{
-		JSpinner out = new JSpinner(model);
-		out.addChangeListener(handler);
-		return out;
-	}
-
-	/**
 	 * Creates a spinner model for numbers.
 	 * @param value the current value.
 	 * @param minimum the minimum value.
@@ -539,32 +551,22 @@ public final class ComponentFactory
 		return new SpinnerDateModel(value, start, end, calendarField);
 	}
 
-	/* ==================================================================== */
-
 	/**
-	 * Creates a combo box (dropdown) with an attached listener.
-	 * @param <E> the item type.
+	 * Creates a value spinner with an attached change listener.
 	 * @param model the spinner model.
-	 * @param listener the change listener.
+	 * @param handler the change handler.
 	 * @return the resultant spinner.
 	 */
-	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model, ItemListener listener)
+	public static JSpinner spinner(SpinnerModel model, ComponentChangeHandler<JSpinner> handler)
 	{
-		JComboBox<E> out = new JComboBox<E>(model);
-		out.addItemListener(listener);
+		JSpinner out = new JSpinner(model);
+		out.addChangeListener(handler);
 		return out;
 	}
 
-	/**
-	 * Creates a combo box (dropdown).
-	 * @param <E> the item type.
-	 * @param model the spinner model.
-	 * @return the resultant spinner.
-	 */
-	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model)
-	{
-		return new JComboBox<E>(model);
-	}
+	
+
+	/* ==================================================================== */
 
 	/**
 	 * Creates a combo box model.
@@ -596,17 +598,62 @@ public final class ComponentFactory
 		return out;
 	}
 
+	/**
+	 * Creates a combo box (dropdown) with an attached listener.
+	 * @param <E> the item type.
+	 * @param model the spinner model.
+	 * @param listener the change listener.
+	 * @return the resultant spinner.
+	 */
+	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model, ItemListener listener)
+	{
+		JComboBox<E> out = new JComboBox<E>(model);
+		out.addItemListener(listener);
+		return out;
+	}
+
+	/**
+	 * Creates a combo box (dropdown).
+	 * @param <E> the item type.
+	 * @param model the spinner model.
+	 * @return the resultant spinner.
+	 */
+	public static <E> JComboBox<E> comboBox(ComboBoxModel<E> model)
+	{
+		return new JComboBox<E>(model);
+	}
+
+	
+
 	/* ==================================================================== */
 
 	/**
 	 * Creates a list with a specific list model.
 	 * @param <E> the object type that the model contains.
-	 * @param renderer the cell renderer.
-	 * @param selectionModel the list selection model.
 	 * @param model the list model.
+	 * @param renderer the cell renderer.
+	 * @param selectionMode the list selection mode (from ListSelectionModel).
+	 * @param handler the listener to use for selection changes.
 	 * @return the list component.
 	 */
-	public static <E> Component list(ListCellRenderer<E> renderer, ListSelectionModel selectionModel, ListModel<E> model)
+	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, int selectionMode, ListSelectionHandler<JList<E>> handler)
+	{
+		JList<E> out = new JList<>(model);
+		out.setCellRenderer(renderer);
+		out.setSelectionMode(selectionMode);
+		out.getSelectionModel().addListSelectionListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a list with a specific list model.
+	 * @param <E> the object type that the model contains.
+	 * @param model the list model.
+	 * @param renderer the cell renderer.
+	 * @param selectionModel the list selection model.
+	 * @return the list component.
+	 */
+	public static <E> Component list(ListModel<E> model, ListCellRenderer<E> renderer, ListSelectionModel selectionModel)
 	{
 		JList<E> out = new JList<>(model);
 		out.setCellRenderer(renderer);
@@ -617,44 +664,30 @@ public final class ComponentFactory
 	/**
 	 * Creates a list with a specific list model.
 	 * @param <E> the object type that the model contains.
-	 * @param renderer the cell renderer.
-	 * @param selectionMode the list selection mode (from ListSelectionModel).
 	 * @param model the list model.
+	 * @param selectionMode the list selection mode (from ListSelectionModel).
+	 * @param handler the listener to use for selection changes.
 	 * @return the list component.
 	 */
-	public static <E> JList<E> list(ListCellRenderer<E> renderer, int selectionMode, ListModel<E> model)
+	public static <E> JList<E> list(ListModel<E> model, int selectionMode, ListSelectionHandler<JList<E>> handler)
 	{
 		JList<E> out = new JList<>(model);
-		out.setCellRenderer(renderer);
 		out.setSelectionMode(selectionMode);
+		out.getSelectionModel().addListSelectionListener(handler);
 		return out;
 	}
-	
+
 	/**
 	 * Creates a list with a specific list model.
 	 * @param <E> the object type that the model contains.
-	 * @param selectionModel the list selection model.
 	 * @param model the list model.
+	 * @param selectionModel the list selection model.
 	 * @return the list component.
 	 */
-	public static <E> JList<E> list(ListSelectionModel selectionModel, ListModel<E> model)
+	public static <E> JList<E> list(ListModel<E> model, ListSelectionModel selectionModel)
 	{
 		JList<E> out = new JList<>(model);
 		out.setSelectionModel(selectionModel);
-		return out;
-	}
-	
-	/**
-	 * Creates a list with a specific list model.
-	 * @param <E> the object type that the model contains.
-	 * @param selectionMode the list selection mode (from ListSelectionModel).
-	 * @param model the list model.
-	 * @return the list component.
-	 */
-	public static <E> JList<E> list(int selectionMode, ListModel<E> model)
-	{
-		JList<E> out = new JList<>(model);
-		out.setSelectionMode(selectionMode);
 		return out;
 	}
 	
@@ -705,63 +738,67 @@ public final class ComponentFactory
 
 	/**
 	 * Creates a new table.
-	 * @param selectionModel the selection model.
-	 * @param columnModel the column model.
 	 * @param model the table model.
+	 * @param columnModel the column model.
+	 * @param selectionMode the list selection mode (from ListSelectionModel).
+	 * @param handler the listener to use for selection changes.
 	 * @return the table created.
 	 */
-	public static JTable table(ListSelectionModel selectionModel, TableColumnModel columnModel, TableModel model)
+	public static JTable table(TableModel model, TableColumnModel columnModel, int selectionMode, ListSelectionHandler<JTable> handler)
+	{
+		JTable out = new JTable(model, columnModel);
+		out.setSelectionMode(selectionMode);
+		out.getSelectionModel().addListSelectionListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a new table.
+	 * @param model the table model.
+	 * @param columnModel the column model.
+	 * @param selectionModel the selection model.
+	 * @return the table created.
+	 */
+	public static JTable table(TableModel model, TableColumnModel columnModel, ListSelectionModel selectionModel)
 	{
 		return new JTable(model, columnModel, selectionModel);
 	}
 	
 	/**
 	 * Creates a new table.
+	 * @param model the table model.
 	 * @param selectionMode the list selection mode (from ListSelectionModel).
-	 * @param columnModel the column model.
-	 * @param model the table model.
+	 * @param handler the listener to use for selection changes.
 	 * @return the table created.
 	 */
-	public static JTable table(int selectionMode, TableColumnModel columnModel, TableModel model)
-	{
-		JTable out = new JTable(model, columnModel);
-		out.setSelectionMode(selectionMode);
-		return out;
-	}
-	
-	/**
-	 * Creates a new table.
-	 * @param columnModel the column model.
-	 * @param model the table model.
-	 * @return the table created.
-	 */
-	public static JTable table(TableColumnModel columnModel, TableModel model)
-	{
-		return new JTable(model, columnModel);
-	}
-	
-	/**
-	 * Creates a new table.
-	 * @param selectionModel the selection model.
-	 * @param model the table model.
-	 * @return the table created.
-	 */
-	public static JTable table(ListSelectionModel selectionModel, TableModel model)
-	{
-		return new JTable(model, new DefaultTableColumnModel(), selectionModel);
-	}
-	
-	/**
-	 * Creates a new table.
-	 * @param selectionMode the list selection mode (from ListSelectionModel).
-	 * @param model the table model.
-	 * @return the table created.
-	 */
-	public static JTable table(int selectionMode, TableModel model)
+	public static JTable table(TableModel model, int selectionMode, ListSelectionHandler<JTable> handler)
 	{
 		JTable out = new JTable(model, new DefaultTableColumnModel());
 		out.setSelectionMode(selectionMode);
+		out.getSelectionModel().addListSelectionListener(handler);
 		return out;
+	}
+
+	/**
+	 * Creates a new table.
+	 * @param model the table model.
+	 * @param selectionModel the selection model.
+	 * @return the table created.
+	 */
+	public static JTable table(TableModel model, ListSelectionModel selectionModel)
+	{
+		return new JTable(model, new DefaultTableColumnModel(), selectionModel);
+	}
+
+	/**
+	 * Creates a new table.
+	 * @param model the table model.
+	 * @param columnModel the column model.
+	 * @return the table created.
+	 */
+	public static JTable table(TableModel model, TableColumnModel columnModel)
+	{
+		return new JTable(model, columnModel);
 	}
 	
 }
