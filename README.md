@@ -1,6 +1,6 @@
 # Black Rook Swing Factory
 
-Copyright (c) 2019 Black Rook Software. All rights reserved.  
+Copyright (c) 2019 Black Rook Software.  
 [https://github.com/BlackRookSoftware/SQL](https://github.com/BlackRookSoftware/SQL)
 
 ### Required Libraries
