@@ -8,13 +8,18 @@ package com.blackrook.swing;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JSlider;
+import javax.swing.border.BevelBorder;
 
+import static com.blackrook.swing.SwingUtils.*;
 import static com.blackrook.swing.ContainerFactory.*;
 import static com.blackrook.swing.MenuFactory.*;
 import static com.blackrook.swing.ComponentFactory.*;
@@ -61,7 +66,20 @@ public final class TreeSwingTest
 					node(BorderLayout.NORTH, button("OK", BUTTON_NAME_PRINTER)),
 					node(BorderLayout.CENTER, new FlowLayout(),
 						node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
-						node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER))
+						node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
+						node(
+								BorderFactory.createBevelBorder(BevelBorder.LOWERED),
+								apply(textField("this is stuff"), (t)->{
+									t.addFocusListener(new FocusAdapter()
+									{
+										@Override
+										public void focusLost(FocusEvent e) 
+										{
+											System.out.println(t.getText());
+										}
+									});
+								})
+							)
 					),
 					node(BorderLayout.SOUTH, button("Cancel", BUTTON_NAME_PRINTER))
 				)

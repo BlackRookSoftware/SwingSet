@@ -8,6 +8,7 @@ package com.blackrook.swing;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemListener;
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -38,13 +39,18 @@ import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 
 import com.blackrook.swing.ActionFactory.ActionEventHandler;
 
@@ -108,15 +114,180 @@ public final class ComponentFactory
 		@SuppressWarnings("unchecked")
 		default void valueChanged(ListSelectionEvent e) 
 		{
-			onSelectionChange((L)e.getSource(), e);
+			onSelectionChange((L)e.getSource(), e.getFirstIndex(), e.getLastIndex(), e.getValueIsAdjusting());
 		}
 		
 		/**
 		 * Called when a list's selection changes.
 		 * @param component the associated component.
-		 * @param e the event.
+		 * @param firstIndex the first index of the selection.
+		 * @param lastIndex the last index of the selection.
+		 * @param adjusting if true, this is in the middle of adjusting, false if not.
 		 */
-		void onSelectionChange(L component, ListSelectionEvent e);
+		void onSelectionChange(L component, int firstIndex, int lastIndex, boolean adjusting);
+	}
+	
+	/**
+	 * A handler interface for listening for list selection events.
+	 * @param <M> the model type.
+	 * @param <D> the data type. 
+	 */
+	@FunctionalInterface
+	public interface ListDataHandlerFunction<M extends ListModel<D>, D>
+	{
+		/**
+		 * Handles list's data model change.
+		 * @param model the source model.
+		 * @param component the associated component.
+		 * @param firstIndex the starting index.
+		 * @param lastIndex the ending index.
+		 * @param data the data itself.
+		 */
+		@SuppressWarnings("unchecked")
+		void onDataEvent(M model, int firstIndex, int lastIndex, D ... data);
+	}
+	
+	/**
+	 * A handler interface for listening for document events.
+	 * @param <T> the text component type. 
+	 */
+	@FunctionalInterface
+	public interface DocumentHandlerFunction<T extends JTextComponent>
+	{
+		/**
+		 * Called on document change.
+		 * @param document the document affected.
+		 * @param offset the offset into the document for the start of the change.
+		 * @param length the length of the change in characters.
+		 * @param event the document event.
+		 */
+		void onDocumentChange(Document document, int offset, int length, DocumentEvent event);
+	}
+	
+	/**
+	 * A handler interface for listening for document events.
+	 * @param <T> the text component type. 
+	 */
+	@FunctionalInterface
+	public interface TextHandlerFunction<T extends JTextComponent> extends DocumentHandlerFunction<T>
+	{
+		@Override
+		default void onDocumentChange(Document document, int offset, int length, DocumentEvent event)
+		{
+			try {
+				onTextChange(document.getText(0, document.getLength()));
+			} catch (BadLocationException e) {
+				// Should not happen.
+			}
+		}
+
+		/**
+		 * Called when the document changes.
+		 * @param text the text after the change.
+		 */
+		void onTextChange(String text);
+	}
+	
+	/**
+	 * An encapsulation for defining how to handle data changes to a list model.
+	 * @param <M> the model type.
+	 * @param <D> the data type. 
+	 */
+	public static class ListDataHandler<M extends ListModel<D>, D> implements ListDataListener
+	{
+		private ListDataHandlerFunction<M, D> addedHandler;
+		private ListDataHandlerFunction<M, D> removedHandler;
+		private ListDataHandlerFunction<M, D> changedHandler;
+		
+		private ListDataHandler(
+				ListDataHandlerFunction<M, D> addedHandler,
+				ListDataHandlerFunction<M, D> removedHandler,
+				ListDataHandlerFunction<M, D> changedHandler
+		){
+			this.addedHandler = addedHandler;
+			this.removedHandler = removedHandler;
+			this.changedHandler = changedHandler;
+		}
+
+		@SuppressWarnings("unchecked")
+		private static <M extends ListModel<D>, D> void callHandler(ListDataEvent e, ListDataHandlerFunction<M, D> func)
+		{
+			M model = (M)e.getSource();
+			D obj = model.getElementAt(e.getIndex0());
+			D[] data = (D[])Array.newInstance(obj.getClass(), e.getIndex1() - e.getIndex0() + 1);
+			for (int i = 0; i < data.length; i++)
+				data[i] = model.getElementAt(e.getIndex0() + i);
+			func.onDataEvent((M)e.getSource(), e.getIndex0(), e.getIndex1(), data);
+		}
+		
+		@Override
+		public void intervalAdded(ListDataEvent e)
+		{
+			callHandler(e, addedHandler);
+		}
+
+		@Override
+		public void intervalRemoved(ListDataEvent e)
+		{
+			callHandler(e, removedHandler);
+		}
+
+		@Override
+		public void contentsChanged(ListDataEvent e)
+		{
+			callHandler(e, changedHandler);
+		}
+	}
+	
+	/**
+	 * An encapsulation for defining how to handle changes to a document model.
+	 * @param <T> the text component type. 
+	 */
+	public static class DocumentHandler<T extends JTextComponent> implements DocumentListener
+	{
+		private DocumentHandlerFunction<T> insertHandler;
+		private DocumentHandlerFunction<T> removeHandler;
+		private DocumentHandlerFunction<T> changeHandler;
+		
+		private DocumentHandler(
+				DocumentHandlerFunction<T> insertHandler,
+				DocumentHandlerFunction<T> removeHandler,
+				DocumentHandlerFunction<T> changeHandler
+		){
+			this.insertHandler = insertHandler;
+			this.removeHandler = removeHandler;
+			this.changeHandler = changeHandler;
+		}
+
+		private DocumentHandler(DocumentHandlerFunction<T> handler)
+		{
+			this.insertHandler = handler;
+			this.removeHandler = handler;
+			this.changeHandler = handler;
+		}
+
+		private static <T extends JTextComponent> void callHandler(DocumentEvent e, DocumentHandlerFunction<T> func)
+		{
+			func.onDocumentChange(e.getDocument(), e.getOffset(), e.getLength(), e);
+		}
+		
+		@Override
+		public void insertUpdate(DocumentEvent e)
+		{
+			callHandler(e, insertHandler);
+		}
+
+		@Override
+		public void removeUpdate(DocumentEvent e)
+		{
+			callHandler(e, removeHandler);
+		}
+
+		@Override
+		public void changedUpdate(DocumentEvent e)
+		{
+			callHandler(e, changeHandler);
+		}
 	}
 	
 	private ComponentFactory() {}
@@ -377,9 +548,52 @@ public final class ComponentFactory
 		return out;
 	}
 	
-	
-	
 	/* ==================================================================== */
+
+	/**
+	 * Creates a single document handler that uses one function for all changes.
+	 * @param <T> the text component type.
+	 * @param insertHandler the handler function for text insertion.
+	 * @param removeHandler the handler function for text removal.
+	 * @param changeHandler the handler function for changes.
+	 * @return a new document handler.
+	 */
+	public static <T extends JTextComponent> DocumentHandler<T> documentHandler(
+			DocumentHandlerFunction<T> insertHandler,
+			DocumentHandlerFunction<T> removeHandler,
+			DocumentHandlerFunction<T> changeHandler
+	){
+		return new DocumentHandler<T>(insertHandler, removeHandler, changeHandler);
+	}
+	
+	/**
+	 * Creates a single document handler that uses one function for all changes.
+	 * @param <T> the text component type.
+	 * @param changeHandler the handler function.
+	 * @return a new document handler.
+	 */
+	public static <T extends JTextComponent> DocumentHandler<T> textHandler(TextHandlerFunction<T> changeHandler)
+	{
+		return new DocumentHandler<T>(changeHandler);
+	}
+
+	/* ==================================================================== */
+	
+	/**
+	 * Creates a new TextArea.
+	 * @param document the backing document model.
+	 * @param text the default starting text contained.
+	 * @param rows the amount of rows.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text area.
+	 */
+	public static JTextArea textArea(Document document, String text, int rows, int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextArea out = new JTextArea(document, text, rows, columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
 
 	/**
 	 * Creates a new TextArea.
@@ -391,7 +605,23 @@ public final class ComponentFactory
 	 */
 	public static JTextArea textArea(Document document, String text, int rows, int columns)
 	{
-		return new JTextArea(document, text, rows, columns);
+		JTextArea out = new JTextArea(document, text, rows, columns);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextArea.
+	 * @param text the default starting text contained.
+	 * @param rows the amount of rows.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text area.
+	 */
+	public static JTextArea textArea(String text, int rows, int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextArea out = new JTextArea(text, rows, columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
 	}
 
 	/**
@@ -403,7 +633,22 @@ public final class ComponentFactory
 	 */
 	public static JTextArea textArea(String text, int rows, int columns)
 	{
-		return new JTextArea(text, rows, columns);
+		JTextArea out = new JTextArea(text, rows, columns);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextArea.
+	 * @param rows the amount of rows.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text area.
+	 */
+	public static JTextArea textArea(int rows, int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextArea out = new JTextArea(rows, columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
 	}
 
 	/**
@@ -414,10 +659,24 @@ public final class ComponentFactory
 	 */
 	public static JTextArea textArea(int rows, int columns)
 	{
-		return new JTextArea(rows, columns);
+		JTextArea out = new JTextArea(rows, columns);
+		return out;
 	}
 
-	/* ==================================================================== */
+	/**
+	 * Creates a new TextField.
+	 * @param document the backing document model.
+	 * @param text the default starting text contained.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(Document document, String text, int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextField out = new JTextField(document, text, columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
 
 	/**
 	 * Creates a new TextField.
@@ -428,7 +687,22 @@ public final class ComponentFactory
 	 */
 	public static JTextField textField(Document document, String text, int columns)
 	{
-		return new JTextField(document, text, columns);
+		JTextField out = new JTextField(document, text, columns);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param text the default starting text contained.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(String text, int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextField out = new JTextField(text, columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
 	}
 
 	/**
@@ -439,7 +713,34 @@ public final class ComponentFactory
 	 */
 	public static JTextField textField(String text, int columns)
 	{
-		return new JTextField(text, columns);
+		JTextField out = new JTextField(text, columns);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(int columns, DocumentHandler<JTextArea> handler)
+	{
+		JTextField out = new JTextField(columns);
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param text the default starting text contained.
+	 * @param handler the listener for all document changes.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(String text, DocumentHandler<JTextArea> handler)
+	{
+		JTextField out = new JTextField(text);
+		out.getDocument().addDocumentListener(handler);
+		return out;
 	}
 
 	/**
@@ -449,7 +750,8 @@ public final class ComponentFactory
 	 */
 	public static JTextField textField(int columns)
 	{
-		return new JTextField(columns);
+		JTextField out = new JTextField(columns);
+		return out;
 	}
 
 	/**
@@ -459,7 +761,20 @@ public final class ComponentFactory
 	 */
 	public static JTextField textField(String text)
 	{
-		return new JTextField(text);
+		JTextField out = new JTextField(text);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param handler the listener for all document changes.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(DocumentHandler<JTextArea> handler)
+	{
+		JTextField out = new JTextField();
+		out.getDocument().addDocumentListener(handler);
+		return out;
 	}
 
 	/**
@@ -468,7 +783,8 @@ public final class ComponentFactory
 	 */
 	public static JTextField textField()
 	{
-		return new JTextField();
+		JTextField out = new JTextField();
+		return out;
 	}
 
 	/* ==================================================================== */
@@ -628,6 +944,54 @@ public final class ComponentFactory
 	/* ==================================================================== */
 
 	/**
+	 * Creates a list model.
+	 * @param <M> the list model type.
+	 * @param <D> the data type contained in the model. 
+	 * @param addedHandler the handler function called for when data is added to the model.
+	 * @param removedHandler  the handler function called for when data is removed from the model.
+	 * @param changedHandler  the handler function called for when data is changed in the model.
+	 * @return the list data handler.
+	 */
+	public static <M extends ListModel<D>, D> ListDataHandler<M, D> listDataHandler(
+			final ListDataHandlerFunction<M, D> addedHandler,
+			final ListDataHandlerFunction<M, D> removedHandler,
+			final ListDataHandlerFunction<M, D> changedHandler
+	){
+		return new ListDataHandler<M, D>(addedHandler, removedHandler, changedHandler);
+	}
+
+	/**
+	 * Creates a list model.
+	 * @param <M> the list model type.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @param handler the data handler to attach to the model (after the items are added, so that events are not fired to it).
+	 * @return the list component.
+	 */
+	public static <M extends ListModel<E>, E> ListModel<E> listModel(Collection<E> objects, ListDataHandler<M, E> handler)
+	{
+		DefaultListModel<E> out = new DefaultListModel<E>();
+		for (E e : objects)
+			out.addElement(e);
+		out.addListDataListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a list model.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @return the list component.
+	 */
+	public static <E> ListModel<E> listModel(Collection<E> objects)
+	{
+		DefaultListModel<E> out = new DefaultListModel<E>();
+		for (E e : objects)
+			out.addElement(e);
+		return out;
+	}
+
+	/**
 	 * Creates a list with a specific list model.
 	 * @param <E> the object type that the model contains.
 	 * @param model the list model.
@@ -704,35 +1068,7 @@ public final class ComponentFactory
 		return out;
 	}
 	
-	/**
-	 * Creates a list model.
-	 * @param <E> the object type that the model contains.
-	 * @param objects the objects to put in the list model.
-	 * @param listener the listener to attach to the model (after items are added).
-	 * @return the list component.
-	 */
-	public static <E> ListModel<E> listModel(Collection<E> objects, ListDataListener listener)
-	{
-		DefaultListModel<E> out = new DefaultListModel<E>();
-		for (E e : objects)
-			out.addElement(e);
-		out.addListDataListener(listener);
-		return out;
-	}
-
-	/**
-	 * Creates a list model.
-	 * @param <E> the object type that the model contains.
-	 * @param objects the objects to put in the list model.
-	 * @return the list component.
-	 */
-	public static <E> ListModel<E> listModel(Collection<E> objects)
-	{
-		DefaultListModel<E> out = new DefaultListModel<E>();
-		for (E e : objects)
-			out.addElement(e);
-		return out;
-	}
+	
 
 	/* ==================================================================== */
 

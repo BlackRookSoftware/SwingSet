@@ -11,6 +11,7 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.function.Consumer;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -33,6 +34,19 @@ public final class SwingUtils
 			desktopInstance = Desktop.getDesktop();
 	}
 
+	/**
+	 * Apply function for objects.
+	 * @param input the input object to manipulate.
+	 * @param applier the function to pass the input element to.
+	 * @param <T> the return/input type.
+	 * @return the input object.
+	 */
+	public static <T> T apply(T input, Consumer<T> applier)
+	{
+		applier.accept(input);
+		return input;
+	}
+	
 	/**
 	 * Sets the system look and feel.
 	 * If this is not possible, this returns false. 
