@@ -92,11 +92,13 @@ public class RasterCanvas extends Canvas
 	
 	/** The image buffer to write as the canvas contents. */
 	private VolatileImage canvasBuffer;
-	
 	/** The image buffer to write to during the current frame. */
 	private VolatileImage writableBuffer;
 	/** Graphics context. */
 	private Graphics2D writableGraphics;
+	
+	/** If true, keeps aspect correct in the renderable area when the canvas resizes. */
+	private boolean correctAspect;
 	
 	/**
 	 * Canvas render dimensions.
@@ -104,11 +106,10 @@ public class RasterCanvas extends Canvas
 	 */
 	private Dimension renderDimensions;
 
-	/** If true, keeps aspect correct in the renderable area when the canvas resizes. */
-	private boolean correctAspect;
-	
 	/** Resampling type. */
 	private ResamplingType resamplingType;
+	/** The canvas clear color. */
+	private Color clearColor;
 	
 	/**
 	 * Creates a new buffered canvas.
@@ -116,11 +117,12 @@ public class RasterCanvas extends Canvas
 	 */
 	public RasterCanvas()
 	{
-		canvasBuffer = null;
-		writableBuffer = null;
-		renderDimensions = null;
-		correctAspect = false;
-		resamplingType = null;
+		this.canvasBuffer = null;
+		this.writableBuffer = null;
+		this.correctAspect = false;
+		this.renderDimensions = null;
+		this.resamplingType = null;
+		this.clearColor = Color.BLACK;
 	}
 	
 	/**
@@ -131,7 +133,7 @@ public class RasterCanvas extends Canvas
 	public RasterCanvas(int x, int y)
 	{
 		this();
-		renderDimensions = new Dimension(x, y);
+		this.renderDimensions = new Dimension(x, y);
 	}
 	
 	/**
@@ -198,20 +200,17 @@ public class RasterCanvas extends Canvas
 		
 		canvasBuffer = recreateVolatileImage(canvasBuffer, getWidth(), getHeight(), Transparency.OPAQUE);
 
-		if (canvasBuffer == null)
-			return;
-
 		Dimension size = REUSED_DIMENSION.get();
 		Rectangle imageBounds = REUSED_RECTANGLE.get();
 		
 		size.width = getWidth();
 		size.height = getHeight();
-		
+
 		getRenderedCanvasDimensions(size, imageBounds);
 		
 		Graphics2D g2d = (Graphics2D)canvasBuffer.getGraphics();
-		g2d.setColor(Color.BLACK);
-		g2d.fillRect(0, 0, size.width, size.height);
+		g2d.setColor(clearColor);
+		g2d.fillRect(0, 0, getWidth(), getHeight());
 		
 		RenderingHints hints = g2d.getRenderingHints();
 		
@@ -302,19 +301,15 @@ public class RasterCanvas extends Canvas
 
 		if (canvasCoordsIn.x < imageBounds.x)
 			return false;
-		if (canvasCoordsIn.x > imageBounds.x + imageBounds.width)
+		if (canvasCoordsIn.x >= imageBounds.x + imageBounds.width)
 			return false;
 		if (canvasCoordsIn.y < imageBounds.y)
 			return false;
-		if (canvasCoordsIn.y > imageBounds.y + imageBounds.height)
+		if (canvasCoordsIn.y >= imageBounds.y + imageBounds.height)
 			return false;
 		
-		// cw = (iw * ch) / ih
-		// ch = (cw * ih) / iw 
-		// iw = (cw * ih) / ch 
-		// ih = (ch * iw) / cw 
-		
-		// TODO: Finish this.
+		imageCoordsOut.x = (int)((double)(canvasCoordsIn.x - imageBounds.x) / imageBounds.width * getFrameWidth());
+		imageCoordsOut.y = (int)((double)(canvasCoordsIn.y - imageBounds.y) / imageBounds.height * getFrameHeight());
 				
 		return true;
 	}
