@@ -551,7 +551,7 @@ public final class ComponentFactory
 	/* ==================================================================== */
 
 	/**
-	 * Creates a single document handler that uses one function for all changes.
+	 * Creates a single document handler that uses different functions for each change type.
 	 * @param <T> the text component type.
 	 * @param insertHandler the handler function for text insertion.
 	 * @param removeHandler the handler function for text removal.
@@ -939,8 +939,6 @@ public final class ComponentFactory
 		return new JComboBox<E>(model);
 	}
 
-	
-
 	/* ==================================================================== */
 
 	/**
@@ -1067,8 +1065,6 @@ public final class ComponentFactory
 		out.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		return out;
 	}
-	
-	
 
 	/* ==================================================================== */
 

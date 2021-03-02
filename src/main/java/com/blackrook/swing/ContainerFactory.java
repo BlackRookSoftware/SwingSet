@@ -160,6 +160,17 @@ public final class ContainerFactory
 
 	/**
 	 * Starts a new branch off of this branch.
+	 * @param border the border to add to the panel.
+	 * @param edges the edges on the branch.
+	 * @return a new branch node.
+	 */
+	public static Node node(Border border, Node ... edges)
+	{
+		return new NodeBranch(new BorderLayout(), border, null, null, edges);
+	}
+
+	/**
+	 * Starts a new branch off of this branch.
 	 * @param layout the layout to use for this branch's children.
 	 * @param edges the edges on the branch.
 	 * @return a new branch node.
@@ -247,7 +258,7 @@ public final class ContainerFactory
 	 * @param tabs the tabs to add.
 	 * @return a new tabbed pane component.
 	 */
-	public static Component tabs(int tabPlacement, int tabLayoutPolicy, Tab ... tabs)
+	public static JTabbedPane tabs(int tabPlacement, int tabLayoutPolicy, Tab ... tabs)
 	{
 		JTabbedPane out = new JTabbedPane(tabPlacement, tabLayoutPolicy);
 		for (Tab t : tabs)
@@ -261,7 +272,7 @@ public final class ContainerFactory
 	 * @param tabs the tabs to add.
 	 * @return a new tabbed pane component.
 	 */
-	public static Component tabs(int tabPlacement, Tab ... tabs)
+	public static JTabbedPane tabs(int tabPlacement, Tab ... tabs)
 	{
 		JTabbedPane out = new JTabbedPane(tabPlacement);
 		for (Tab t : tabs)
@@ -274,7 +285,7 @@ public final class ContainerFactory
 	 * @param tabs the tabs to add.
 	 * @return a new tabbed pane component.
 	 */
-	public static Component tabs(Tab ... tabs)
+	public static JTabbedPane tabs(Tab ... tabs)
 	{
 		JTabbedPane out = new JTabbedPane();
 		for (Tab t : tabs)

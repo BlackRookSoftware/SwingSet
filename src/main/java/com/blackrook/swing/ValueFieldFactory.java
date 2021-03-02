@@ -6,14 +6,22 @@
 package com.blackrook.swing;
 
 import java.awt.BorderLayout;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.function.Function;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.BevelBorder;
 
 /**
- * A field factory that
+ * A field factory that creates form fields.
  * @author Matthew Tropiano
  */
 public class ValueFieldFactory
@@ -32,12 +40,40 @@ public class ValueFieldFactory
 	}
 
 	/**
-	 * Creates a new text field that stores an double type.
-	 * A blank value means null.
+	 * Creates a new text field that stores a string type.
+	 * Nulls are converted to empty string.
+	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Double> doubleField(final Double initialValue)
+	public static JValueTextField<String> stringField(final boolean nullable, final String initialValue)
+	{
+		return new JValueTextField<String>(initialValue) 
+		{
+			private static final long serialVersionUID = -6772532768586868189L;
+
+			@Override
+			public String getValueFromText(String text)
+			{
+				return text;
+			}
+
+			@Override
+			public String getTextFromValue(String value)
+			{
+				return value != null ? String.valueOf(value) : "";
+			}
+		};
+	}
+
+	/**
+	 * Creates a new text field that stores an double type.
+	 * A blank value means null.
+	 * @param nullable if true, this is a nullable field.
+	 * @param initialValue the field's initial value.
+	 * @return the generated field.
+	 */
+	public static JValueTextField<Double> doubleField(final boolean nullable, final Double initialValue)
 	{
 		return new JValueTextField<Double>(initialValue) 
 		{
@@ -47,16 +83,16 @@ public class ValueFieldFactory
 			public Double getValueFromText(String text)
 			{
 				try {
-					return Double.parseDouble(text);
+					return Double.parseDouble(text.trim());
 				} catch (NumberFormatException e) {
-					return null;
+					return nullable ? null : 0.0;
 				}
 			}
 
 			@Override
 			public String getTextFromValue(Double value)
 			{
-				return value != null ? String.valueOf(value) : "";
+				return value != null ? String.valueOf(value) : (nullable ? "" : "0.0");
 			}
 		};
 	}
@@ -64,10 +100,11 @@ public class ValueFieldFactory
 	/**
 	 * Creates a new text field that stores a float type.
 	 * A blank value means null.
+	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Float> floatField(final Float initialValue)
+	public static JValueTextField<Float> floatField(final boolean nullable, final Float initialValue)
 	{
 		return new JValueTextField<Float>(initialValue) 
 		{
@@ -77,16 +114,16 @@ public class ValueFieldFactory
 			public Float getValueFromText(String text)
 			{
 				try {
-					return Float.parseFloat(text);
+					return Float.parseFloat(text.trim());
 				} catch (NumberFormatException e) {
-					return null;
+					return nullable ? null : 0.0f;
 				}
 			}
 	
 			@Override
 			public String getTextFromValue(Float value)
 			{
-				return value != null ? String.valueOf(value) : "";
+				return value != null ? String.valueOf(value) : (nullable ? "" : "0.0");
 			}
 		};
 	}
@@ -94,10 +131,11 @@ public class ValueFieldFactory
 	/**
 	 * Creates a new text field that stores an long integer type.
 	 * A blank value means null.
+	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Long> longField(final Long initialValue)
+	public static JValueTextField<Long> longField(final boolean nullable, final Long initialValue)
 	{
 		return new JValueTextField<Long>(initialValue) 
 		{
@@ -107,16 +145,16 @@ public class ValueFieldFactory
 			public Long getValueFromText(String text)
 			{
 				try {
-					return Long.parseLong(text);
+					return Long.parseLong(text.trim());
 				} catch (NumberFormatException e) {
-					return null;
+					return nullable ? null : 0L;
 				}
 			}
 
 			@Override
 			public String getTextFromValue(Long value)
 			{
-				return value != null ? String.valueOf(value) : "";
+				return value != null ? String.valueOf(value) : (nullable ? "" : "0");
 			}
 		};
 	}
@@ -124,10 +162,11 @@ public class ValueFieldFactory
 	/**
 	 * Creates a new text field that stores an integer type.
 	 * A blank value means null.
+	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Integer> integerField(final Integer initialValue)
+	public static JValueTextField<Integer> integerField(final boolean nullable, final Integer initialValue)
 	{
 		return new JValueTextField<Integer>(initialValue) 
 		{
@@ -137,16 +176,16 @@ public class ValueFieldFactory
 			public Integer getValueFromText(String text)
 			{
 				try {
-					return Integer.parseInt(text);
+					return Integer.parseInt(text.trim());
 				} catch (NumberFormatException e) {
-					return null;
+					return nullable ? null : 0;
 				}
 			}
 
 			@Override
 			public String getTextFromValue(Integer value)
 			{
-				return value != null ? String.valueOf(value) : "";
+				return value != null ? String.valueOf(value) : (nullable ? "" : "0");
 			}
 		};
 	}
@@ -154,10 +193,11 @@ public class ValueFieldFactory
 	/**
 	 * Creates a new text field that stores a short type.
 	 * A blank value means null.
+	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Short> shortField(final Short initialValue)
+	public static JValueTextField<Short> shortField(final boolean nullable, final Short initialValue)
 	{
 		JValueTextField<Short> out = new JValueTextField<Short>(initialValue) 
 		{
@@ -167,16 +207,16 @@ public class ValueFieldFactory
 			public Short getValueFromText(String text)
 			{
 				try {
-					return Short.parseShort(text);
+					return Short.parseShort(text.trim());
 				} catch (NumberFormatException e) {
-					return null;
+					return nullable ? null : (short)0;
 				}
 			}
 
 			@Override
 			public String getTextFromValue(Short value)
 			{
-				return value != null ? String.valueOf(value) : "";
+				return value != null ? String.valueOf(value) : (nullable ? "" : "0");
 			}
 		};
 		return out;
@@ -185,10 +225,11 @@ public class ValueFieldFactory
 	/**
 	 * Creates a new text field that stores a byte type.
 	 * A blank value means null.
+	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Byte> byteField(Byte initialValue)
+	public static JValueTextField<Byte> byteField(final boolean nullable, final Byte initialValue)
 	{
 		JValueTextField<Byte> out = new JValueTextField<Byte>(initialValue) 
 		{
@@ -198,16 +239,16 @@ public class ValueFieldFactory
 			public Byte getValueFromText(String text)
 			{
 				try {
-					return Byte.parseByte(text);
+					return Byte.parseByte(text.trim());
 				} catch (NumberFormatException e) {
-					return null;
+					return nullable ? null : (byte)0;
 				}
 			}
 
 			@Override
 			public String getTextFromValue(Byte value)
 			{
-				return value != null ? String.valueOf(value) : "";
+				return value != null ? String.valueOf(value) : (nullable ? "" : "0");
 			}
 		};
 		return out;
@@ -217,6 +258,7 @@ public class ValueFieldFactory
 
 	/**
 	 * Creates a new text field that encapsulates a label plus form field.
+	 * The label is placed on the left.
 	 * @param <T> the type that this field stores.
 	 * @param label the label to place next to the field.
 	 * @param field the field itself.
@@ -225,6 +267,19 @@ public class ValueFieldFactory
 	public static <T> JValuePanel<T> formField(JLabel label, JValueTextField<T> field)
 	{
 		return new JValuePanel<T>(label, field);
+	}
+
+	/**
+	 * Creates a new text field that encapsulates a label plus form field.
+	 * The label is placed on the right.
+	 * @param <T> the type that this field stores.
+	 * @param label the label to place next to the field.
+	 * @param field the field itself.
+	 * @return the generated field.
+	 */
+	public static <T> JValuePanel<T> formField(JValueTextField<T> field, JLabel label)
+	{
+		return new JValuePanel<T>(field, label);
 	}
 
 	/* ==================================================================== */
@@ -269,6 +324,14 @@ public class ValueFieldFactory
 			add(this.field = field, BorderLayout.CENTER);
 		}
 		
+		private JValuePanel(JValueTextField<T> field, JLabel label)
+		{
+			super();
+			setLayout(new BorderLayout());
+			add(this.field = field, BorderLayout.CENTER);
+			add(this.label = label, BorderLayout.EAST);
+		}
+		
 		/**
 		 * Sets the label text.
 		 * @param text the new text.
@@ -276,6 +339,14 @@ public class ValueFieldFactory
 		public void setLabel(String text)
 		{
 			label.setText(text);
+		}
+		
+		/**
+		 * @return the label component.
+		 */
+		public JLabel getLabel() 
+		{
+			return label;
 		}
 		
 		@Override
@@ -299,6 +370,39 @@ public class ValueFieldFactory
 	{
 		private static final long serialVersionUID = -8674796823012708679L;
 		
+		private static final FocusListener FOCUS = new FocusAdapter()
+		{
+			@Override
+			public void focusGained(FocusEvent e) 
+			{
+				((JValueTextField<?>)e.getComponent()).selectAll();
+			}
+			
+			@Override
+			public void focusLost(FocusEvent e) 
+			{
+				((JValueTextField<?>)e.getComponent()).refreshValue();
+			}
+		};
+		
+		private static final KeyListener ENTER = new KeyAdapter() 
+		{
+			@Override
+			public void keyPressed(KeyEvent e) 
+			{
+				JValueTextField<?> component = (JValueTextField<?>)e.getComponent();
+				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+				{
+					component.transferFocus();
+				}
+				else if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+				{
+					component.restoreValue();
+					component.transferFocus();
+				}
+			}
+		};
+		
 		/** The stored value. */
 		private T value;
 		
@@ -309,7 +413,10 @@ public class ValueFieldFactory
 		public JValueTextField(T initialValue)
 		{
 			super();
+			setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 			setValue(initialValue);
+			addFocusListener(FOCUS);
+			addKeyListener(ENTER);
 		}
 		
 		/**
@@ -352,6 +459,17 @@ public class ValueFieldFactory
 		{
 			this.value = value;
 			super.setText(getTextFromValue(value));
+		}
+		
+		// Refreshes an entered value.
+		private void refreshValue()
+		{
+			setValue(getValueFromText(getText()));
+		}
+		
+		private void restoreValue()
+		{
+			setValue(getValue());
 		}
 		
 	}
