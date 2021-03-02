@@ -60,7 +60,7 @@ public final class ContainerFactory
 	}
 
 	/**
-	 * Starts a TreeSwing with a BorderLayout.
+	 * Starts a Container with a BorderLayout.
 	 * @param root the root node.
 	 * @return a component that is the result of creating the tree.
 	 */
@@ -431,7 +431,7 @@ public final class ContainerFactory
 	}
 
 	/**
-	 * Common TreeSwing node.
+	 * Common Swing node.
 	 */
 	public static abstract class Node
 	{
@@ -446,7 +446,7 @@ public final class ContainerFactory
 	}
 
 	/**
-	 * Leaf node in TreeSwing.
+	 * Leaf node in Swing.
 	 */
 	private static class NodeLeaf extends Node
 	{
@@ -465,7 +465,7 @@ public final class ContainerFactory
 	}
 
 	/**
-	 * Branch node in TreeSwing.
+	 * Branch node in Swing.
 	 */
 	private static class NodeBranch extends Node
 	{
