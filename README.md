@@ -1,7 +1,7 @@
 # Black Rook Swing Factory
 
-Copyright (c) 2019 Black Rook Software.  
-[https://github.com/BlackRookSoftware/SQL](https://github.com/BlackRookSoftware/SQL)
+Copyright (c) 2019-2021 Black Rook Software.  
+[https://github.com/BlackRookSoftware/Swing](https://github.com/BlackRookSoftware/Swing)
 
 ### Required Libraries
 
@@ -17,7 +17,8 @@ NONE
 
 ### Introduction
 
-This library contains classes for creating common Swing objects quickly.
+This library contains classes for creating common Swing objects quickly. These classes can be 
+redistributed in whole or in part.
 
 
 ### Why?

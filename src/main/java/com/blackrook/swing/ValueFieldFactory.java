@@ -6,19 +6,19 @@
 package com.blackrook.swing;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-import javax.swing.BorderFactory;
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.BevelBorder;
 
 /**
  * A field factory that creates form fields.
@@ -264,7 +264,7 @@ public class ValueFieldFactory
 	 * @param field the field itself.
 	 * @return the generated field.
 	 */
-	public static <T> JValuePanel<T> formField(JLabel label, JValueTextField<T> field)
+	public static <T> JValuePanel<T> formField(JLabel label, JFormField<T> field)
 	{
 		return new JValuePanel<T>(label, field);
 	}
@@ -277,7 +277,7 @@ public class ValueFieldFactory
 	 * @param field the field itself.
 	 * @return the generated field.
 	 */
-	public static <T> JValuePanel<T> formField(JValueTextField<T> field, JLabel label)
+	public static <T> JValuePanel<T> formField(JFormField<T> field, JLabel label)
 	{
 		return new JValuePanel<T>(field, label);
 	}
@@ -288,18 +288,20 @@ public class ValueFieldFactory
 	 * Input field interface used for the Black Rook Swing input components.
 	 * @param <V> the type of value stored by this field.
 	 */
-	public interface JFormField<V>
+	public static abstract class JFormField<V> extends JPanel
 	{
+		private static final long serialVersionUID = 1207550884473493069L;
+
 		/**
 		 * @return the field's value. 
 		 */
-		public V getValue();
+		public abstract V getValue();
 		
 		/**
 		 * Sets the field's value.
 		 * @param value the new value. 
 		 */
-		public void setValue(V value);
+		public abstract void setValue(V value);
 		
 	}
 
@@ -309,26 +311,26 @@ public class ValueFieldFactory
 	 * An encapsulated form field with a label. 
 	 * @param <T> the value type stored by this panel.
 	 */
-	public static class JValuePanel<T> extends JPanel implements JFormField<T>
+	public static class JValuePanel<T> extends JFormField<T>
 	{
 		private static final long serialVersionUID = -7165231538037948972L;
 		
 		private JLabel label;
-		private JValueTextField<T> field;
+		private JFormField<T> formField;
 		
-		private JValuePanel(JLabel label, JValueTextField<T> field)
+		private JValuePanel(JLabel label, JFormField<T> field)
 		{
 			super();
 			setLayout(new BorderLayout());
 			add(this.label = label, BorderLayout.WEST);
-			add(this.field = field, BorderLayout.CENTER);
+			add(this.formField = field, BorderLayout.CENTER);
 		}
 		
-		private JValuePanel(JValueTextField<T> field, JLabel label)
+		private JValuePanel(JFormField<T> field, JLabel label)
 		{
 			super();
 			setLayout(new BorderLayout());
-			add(this.field = field, BorderLayout.CENTER);
+			add(this.formField = field, BorderLayout.CENTER);
 			add(this.label = label, BorderLayout.EAST);
 		}
 		
@@ -352,6 +354,57 @@ public class ValueFieldFactory
 		@Override
 		public T getValue()
 		{
+			return formField.getValue();
+		}
+	
+		@Override
+		public void setValue(T value) 
+		{
+			formField.setValue(value);
+		}
+		
+	}
+
+	/**
+	 * A field with a button for "browsing" for a value to set.
+	 * @param <T> the value type.
+	 */
+	public static abstract class JValueBrowseField<T> extends JValueTextField<T>
+	{
+		private static final long serialVersionUID = 7171922756771225976L;
+		
+		private JValueTextField<T> field;
+
+		/**
+		 * Creates a new browse field.
+		 * @param field the text value field.
+		 * @param browseText the browse button text.
+		 * @param browseSupplier the browse value function. 
+		 */
+		public JValueBrowseField(JValueTextField<T> field, String browseText, final Supplier<T> browseSupplier)
+		{
+			super();
+			setLayout(new BorderLayout());
+			
+			add(this.field = field, BorderLayout.CENTER);
+			add(new JButton(new AbstractAction(browseText)
+			{
+				private static final long serialVersionUID = -7785265067430010139L;
+
+				@Override
+				public void actionPerformed(ActionEvent e) 
+				{
+					T value;
+					if ((value = browseSupplier.get()) != null)
+						setValue(value);
+				}
+				
+			}), BorderLayout.EAST);
+		}
+		
+		@Override
+		public T getValue()
+		{
 			return field.getValue();
 		}
 	
@@ -360,51 +413,21 @@ public class ValueFieldFactory
 		{
 			field.setValue(value);
 		}
+		
 	}
-
+	
 	/**
 	 * A text field that is the representation of a greater value.
 	 * @param <T> the type that this field stores.
 	 */
-	public static abstract class JValueTextField<T> extends JTextField implements JFormField<T>
+	public static abstract class JValueTextField<T> extends JFormField<T>
 	{
 		private static final long serialVersionUID = -8674796823012708679L;
 		
-		private static final FocusListener FOCUS = new FocusAdapter()
-		{
-			@Override
-			public void focusGained(FocusEvent e) 
-			{
-				((JValueTextField<?>)e.getComponent()).selectAll();
-			}
-			
-			@Override
-			public void focusLost(FocusEvent e) 
-			{
-				((JValueTextField<?>)e.getComponent()).refreshValue();
-			}
-		};
-		
-		private static final KeyListener ENTER = new KeyAdapter() 
-		{
-			@Override
-			public void keyPressed(KeyEvent e) 
-			{
-				JValueTextField<?> component = (JValueTextField<?>)e.getComponent();
-				if (e.getKeyCode() == KeyEvent.VK_ENTER)
-				{
-					component.transferFocus();
-				}
-				else if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
-				{
-					component.restoreValue();
-					component.transferFocus();
-				}
-			}
-		};
-		
 		/** The stored value. */
 		private T value;
+		/** The stored value. */
+		private JTextField textField;
 		
 		/**
 		 * Creates a new text field.
@@ -412,11 +435,8 @@ public class ValueFieldFactory
 		 */
 		public JValueTextField(T initialValue)
 		{
-			super();
-			setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+			this();
 			setValue(initialValue);
-			addFocusListener(FOCUS);
-			addKeyListener(ENTER);
 		}
 		
 		/**
@@ -424,7 +444,42 @@ public class ValueFieldFactory
 		 */
 		public JValueTextField()
 		{
-			super();
+			setLayout(new BorderLayout());
+			this.textField = new JTextField();
+			
+			this.textField.addFocusListener(new FocusAdapter()
+			{
+				@Override
+				public void focusGained(FocusEvent e) 
+				{
+					textField.selectAll();
+				}
+				
+				@Override
+				public void focusLost(FocusEvent e) 
+				{
+					refreshValue();
+				}
+			});
+			
+			this.textField.addKeyListener(new KeyAdapter() 
+			{
+				@Override
+				public void keyPressed(KeyEvent e) 
+				{
+					if (e.getKeyCode() == KeyEvent.VK_ENTER)
+					{
+						e.getComponent().transferFocus();
+					}
+					else if (e.getKeyCode() == KeyEvent.VK_ESCAPE)
+					{
+						restoreValue();
+						e.getComponent().transferFocus();
+					}
+				}
+			});
+			
+			add(this.textField);
 		}
 		
 		/**
@@ -441,11 +496,13 @@ public class ValueFieldFactory
 		 */
 		public abstract String getTextFromValue(T value);
 
-		@Override
-		public void setText(String t)
+		/**
+		 * Sets the value from text.
+		 * @param text the text to set.
+		 */
+		public void setText(String text)
 		{
-			setValue(getValueFromText(t));
-			super.setText(getTextFromValue(value));
+			setValue(getValueFromText(text));
 		}
 
 		@Override
@@ -458,13 +515,13 @@ public class ValueFieldFactory
 		public void setValue(T value)
 		{
 			this.value = value;
-			super.setText(getTextFromValue(value));
+			textField.setText(getTextFromValue(value));
 		}
 		
 		// Refreshes an entered value.
 		private void refreshValue()
 		{
-			setValue(getValueFromText(getText()));
+			setValue(getValueFromText(textField.getText()));
 		}
 		
 		private void restoreValue()
