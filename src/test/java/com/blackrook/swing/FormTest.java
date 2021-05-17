@@ -8,34 +8,22 @@ package com.blackrook.swing;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JMenuItem;
 import javax.swing.JSlider;
 import javax.swing.border.BevelBorder;
 
 import static com.blackrook.swing.SwingUtils.*;
 import static com.blackrook.swing.ContainerFactory.*;
-import static com.blackrook.swing.MenuFactory.*;
 import static com.blackrook.swing.ComponentFactory.*;
 import static com.blackrook.swing.FormFactory.*;
 
-public final class TreeSwingTest
+public final class FormTest
 {
 	public static void main(String[] args)
 	{
 		SwingUtils.setSystemLAF();
-		
-		ComponentActionHandler<JMenuItem> PRINT_MENUITEM_NAME = (x, e)->{
-			System.out.println(x.getText());
-		};
-		
-		ComponentActionHandler<JButton> BUTTON_NAME_PRINTER = (b, e)->{
-			System.out.println(b.getText());
-		};
 		
 		ComponentChangeHandler<JSlider> SLIDER_VALUE_PRINTER = (s)->{
 			if (s.getValueIsAdjusting())
@@ -43,38 +31,19 @@ public final class TreeSwingTest
 		};
 		
 		JFrame f = frame("Test",
-			menuBar(
-				menu("File", KeyEvent.VK_F,
-					item("New", KeyEvent.VK_N, PRINT_MENUITEM_NAME),
-					item("Open", KeyEvent.VK_O, PRINT_MENUITEM_NAME),
-					separator(),
-					item("Exit", KeyEvent.VK_X, PRINT_MENUITEM_NAME)
-				),
-				menu("Edit", KeyEvent.VK_E,
-					item("Stuff", KeyEvent.VK_S,
-						item("Junk", KeyEvent.VK_J, PRINT_MENUITEM_NAME),
-						item("Crud", KeyEvent.VK_C, PRINT_MENUITEM_NAME),
-						checkBoxItem("Option", false, KeyEvent.VK_O, (item, e)->{
-							System.out.println(item.getState());
-						})
-					)
-				)
-			),
 			containerOf(
 				node(new Dimension(256, 256), new BorderLayout(),
-					node(BorderLayout.NORTH, button("OK", BUTTON_NAME_PRINTER)),
 					node(BorderLayout.CENTER, new FlowLayout(),
 						node(apply(shortTextField(false, (short)0), (s)->{
 							s.setPreferredSize(new Dimension(100, 20));
 						})),
-						node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
-						node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
+						node(sliderField(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER))),
+						node(sliderField(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER))),
 						node(
 							BorderFactory.createBevelBorder(BevelBorder.LOWERED),
 							node(textField("this is stuff"))
 						)
-					),
-					node(BorderLayout.SOUTH, button("Cancel", BUTTON_NAME_PRINTER))
+					)
 				)
 			)
 		);

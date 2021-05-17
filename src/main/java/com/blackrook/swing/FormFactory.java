@@ -11,20 +11,26 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
 
 /**
  * A field factory that creates form fields.
  * @author Matthew Tropiano
  */
-public class ValueFieldFactory
+public class FormFactory
 {
 	/**
 	 * Creates a new text field that stores a custom value type.
@@ -34,7 +40,7 @@ public class ValueFieldFactory
 	 * @param toStringConverter the converter function for value to text.
 	 * @return the generated field.
 	 */
-	public static <T> JValueTextField<T> valueField(T initialValue, Function<String, T> toValueConverter, Function<T, String> toStringConverter)
+	public static <T> JFormField<T> valueTextField(T initialValue, Function<String, T> toValueConverter, Function<T, String> toStringConverter)
 	{
 		return new CustomValueTextField<T>(initialValue, toValueConverter, toStringConverter);
 	}
@@ -46,7 +52,7 @@ public class ValueFieldFactory
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<String> stringField(final boolean nullable, final String initialValue)
+	public static JFormField<String> stringTextField(final boolean nullable, final String initialValue)
 	{
 		return new JValueTextField<String>(initialValue) 
 		{
@@ -73,7 +79,7 @@ public class ValueFieldFactory
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Double> doubleField(final boolean nullable, final Double initialValue)
+	public static JFormField<Double> doubleTextField(final boolean nullable, final Double initialValue)
 	{
 		return new JValueTextField<Double>(initialValue) 
 		{
@@ -104,7 +110,7 @@ public class ValueFieldFactory
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Float> floatField(final boolean nullable, final Float initialValue)
+	public static JFormField<Float> floatTextField(final boolean nullable, final Float initialValue)
 	{
 		return new JValueTextField<Float>(initialValue) 
 		{
@@ -135,7 +141,7 @@ public class ValueFieldFactory
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Long> longField(final boolean nullable, final Long initialValue)
+	public static JFormField<Long> longTextField(final boolean nullable, final Long initialValue)
 	{
 		return new JValueTextField<Long>(initialValue) 
 		{
@@ -166,7 +172,7 @@ public class ValueFieldFactory
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Integer> integerField(final boolean nullable, final Integer initialValue)
+	public static JFormField<Integer> integerTextField(final boolean nullable, final Integer initialValue)
 	{
 		return new JValueTextField<Integer>(initialValue) 
 		{
@@ -197,9 +203,9 @@ public class ValueFieldFactory
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Short> shortField(final boolean nullable, final Short initialValue)
+	public static JFormField<Short> shortTextField(final boolean nullable, final Short initialValue)
 	{
-		JValueTextField<Short> out = new JValueTextField<Short>(initialValue) 
+		return new JValueTextField<Short>(initialValue) 
 		{
 			private static final long serialVersionUID = -8246324851207769036L;
 
@@ -219,7 +225,6 @@ public class ValueFieldFactory
 				return value != null ? String.valueOf(value) : (nullable ? "" : "0");
 			}
 		};
-		return out;
 	}
 
 	/**
@@ -229,9 +234,9 @@ public class ValueFieldFactory
 	 * @param initialValue the field's initial value.
 	 * @return the generated field.
 	 */
-	public static JValueTextField<Byte> byteField(final boolean nullable, final Byte initialValue)
+	public static JFormField<Byte> byteTextField(final boolean nullable, final Byte initialValue)
 	{
-		JValueTextField<Byte> out = new JValueTextField<Byte>(initialValue) 
+		return new JValueTextField<Byte>(initialValue) 
 		{
 			private static final long serialVersionUID = -1550432765342203835L;
 
@@ -251,39 +256,236 @@ public class ValueFieldFactory
 				return value != null ? String.valueOf(value) : (nullable ? "" : "0");
 			}
 		};
-		return out;
 	}
 
 	/* ==================================================================== */
 
 	/**
-	 * Creates a new text field that encapsulates a label plus form field.
-	 * The label is placed on the left.
-	 * @param <T> the type that this field stores.
-	 * @param label the label to place next to the field.
-	 * @param field the field itself.
-	 * @return the generated field.
+	 * Creates a form field from a check box.
+	 * @param checkBox the checkbox to encapsulate.
+	 * @return a new form field that encapsulates a checkbox.
 	 */
-	public static <T> JValuePanel<T> formField(JLabel label, JFormField<T> field)
+	public static JFormField<Boolean> checkBoxField(final JCheckBox checkBox)
 	{
-		return new JValuePanel<T>(label, field);
-	}
+		return new JFormField<Boolean>() 
+		{
+			private static final long serialVersionUID = -1477632818725772731L;
 
+			private JCheckBox field;
+			
+			{
+				this.field = checkBox;
+				setLayout(new BorderLayout());
+				add(BorderLayout.CENTER, this.field);
+			}
+			
+			@Override
+			public Boolean getValue()
+			{
+				return field.isSelected();
+			}
+
+			@Override
+			public void setValue(Boolean value)
+			{
+				field.setSelected(value);
+			}
+		};
+	}
+	
 	/**
-	 * Creates a new text field that encapsulates a label plus form field.
-	 * The label is placed on the right.
-	 * @param <T> the type that this field stores.
-	 * @param label the label to place next to the field.
-	 * @param field the field itself.
-	 * @return the generated field.
+	 * Creates a form field from a slider.
+	 * @param slider the slider to encapsulate.
+	 * @return a new form field that encapsulates a slider.
 	 */
-	public static <T> JValuePanel<T> formField(JFormField<T> field, JLabel label)
+	public static JFormField<Integer> sliderField(final JSlider slider)
 	{
-		return new JValuePanel<T>(field, label);
+		return sliderField(
+			String.valueOf(slider.getModel().getMinimum()),
+			String.valueOf(slider.getModel().getMaximum()),
+			slider
+		);
 	}
+	
+	/**
+	 * Creates a form field from a slider.
+	 * @param minLabel the minimum value label.
+	 * @param maxLabel the maximum value label.
+	 * @param slider the slider to encapsulate.
+	 * @return a new form field that encapsulates a slider.
+	 */
+	public static JFormField<Integer> sliderField(String minLabel, String maxLabel, final JSlider slider)
+	{
+		return new JFormField<Integer>() 
+		{
+			private static final long serialVersionUID = 4363610257614419998L;
 
+			private JSlider field;
+			
+			{
+				this.field = slider;
+				setLayout(new BorderLayout());
+				if (minLabel != null)
+					add(BorderLayout.WEST, new JLabel(minLabel));
+				add(BorderLayout.CENTER, this.field);
+				if (maxLabel != null)
+					add(BorderLayout.EAST, new JLabel(maxLabel));
+			}
+			
+			@Override
+			public Integer getValue()
+			{
+				return field.getValue();
+			}
+
+			@Override
+			public void setValue(Integer value)
+			{
+				field.setValue(value);
+			}
+		};
+	}
+	
+	/**
+	 * Creates a form field from a spinner.
+	 * @param <T> the spinner return type.
+	 * @param spinner the spinner to encapsulate.
+	 * @return a new form field that encapsulates a spinner.
+	 */
+	public static <T> JFormField<T> spinnerField(final JSpinner spinner)
+	{
+		return new JFormField<T>() 
+		{
+			private static final long serialVersionUID = -876324303202896183L;
+			
+			private JSpinner field;
+			
+			{
+				this.field = spinner;
+				setLayout(new BorderLayout());
+				add(BorderLayout.CENTER, this.field);
+			}
+			
+			@Override
+			@SuppressWarnings("unchecked")
+			public T getValue()
+			{
+				return (T)field.getValue();
+			}
+
+			@Override
+			public void setValue(T value)
+			{
+				field.setValue(value);
+			}
+		};
+	}
+	
+	/**
+	 * Creates a form field from a combo box.
+	 * @param <T> the combo box type.
+	 * @param comboBox the combo box to encapsulate.
+	 * @return a new form field that encapsulates a combo box.
+	 */
+	public static <T> JFormField<T> comboField(final JComboBox<T> comboBox)
+	{
+		return new JFormField<T>() 
+		{
+			private static final long serialVersionUID = -7563041869993609681L;
+
+			private JComboBox<T> field;
+			
+			{
+				this.field = comboBox;
+				setLayout(new BorderLayout());
+				add(BorderLayout.CENTER, this.field);
+			}
+			
+			@Override
+			@SuppressWarnings("unchecked")
+			public T getValue()
+			{
+				return (T)field.getSelectedItem();
+			}
+
+			@Override
+			public void setValue(T value)
+			{
+				field.setSelectedItem(value);
+			}
+		};
+	}
+	
+	/**
+	 * Creates a form field from a list.
+	 * @param <T> the list type.
+	 * @param list the list to encapsulate.
+	 * @return a new form field that encapsulates a list.
+	 */
+	public static <T> JFormField<T> listField(final JList<T> list)
+	{
+		return new JFormField<T>() 
+		{
+			private static final long serialVersionUID = 1064013371765783373L;
+			
+			private JList<T> field;
+			
+			{
+				this.field = list;
+				setLayout(new BorderLayout());
+				add(BorderLayout.CENTER, this.field);
+			}
+			
+			@Override
+			public T getValue()
+			{
+				return field.getSelectedValue();
+			}
+
+			@Override
+			public void setValue(T value)
+			{
+				field.setSelectedValue(value, true);
+			}
+		};
+	}
+	
 	/* ==================================================================== */
+	
+	/**
+	 * A single form.
+	 */
+	public static class JFormPanel extends JPanel
+	{
+		private static final long serialVersionUID = -3154883143018532725L;
+		
+		/** 
+		 * Parameter for what side the label is on in the form. 
+		 */
+		public enum LabelSide
+		{
+			LEFT,
+			RIGHT;
+		}
 
+		/** 
+		 * Parameter for the label justification.
+		 */
+		public enum LabelJustification
+		{
+			LEFT,
+			CENTER,
+			RIGHT;
+		}
+
+		private LabelSide labelSide;
+		private LabelJustification labelJustification;
+		private int labelWidth;
+		private Map<Object, JFormField<?>> fieldValueMap;
+		
+		
+	}
+	
 	/**
 	 * Input field interface used for the Black Rook Swing input components.
 	 * @param <V> the type of value stored by this field.
@@ -291,7 +493,7 @@ public class ValueFieldFactory
 	public static abstract class JFormField<V> extends JPanel
 	{
 		private static final long serialVersionUID = 1207550884473493069L;
-
+		
 		/**
 		 * @return the field's value. 
 		 */
@@ -305,20 +507,18 @@ public class ValueFieldFactory
 		
 	}
 
-	/* ==================================================================== */
-	
 	/**
 	 * An encapsulated form field with a label. 
 	 * @param <T> the value type stored by this panel.
 	 */
-	public static class JValuePanel<T> extends JFormField<T>
+	public static class JFormFieldPanel<T> extends JFormField<T>
 	{
 		private static final long serialVersionUID = -7165231538037948972L;
 		
 		private JLabel label;
 		private JFormField<T> formField;
 		
-		private JValuePanel(JLabel label, JFormField<T> field)
+		private JFormFieldPanel(JLabel label, JFormField<T> field)
 		{
 			super();
 			setLayout(new BorderLayout());
@@ -326,7 +526,7 @@ public class ValueFieldFactory
 			add(this.formField = field, BorderLayout.CENTER);
 		}
 		
-		private JValuePanel(JFormField<T> field, JLabel label)
+		private JFormFieldPanel(JFormField<T> field, JLabel label)
 		{
 			super();
 			setLayout(new BorderLayout());
@@ -381,7 +581,7 @@ public class ValueFieldFactory
 		 * @param browseText the browse button text.
 		 * @param browseSupplier the browse value function. 
 		 */
-		public JValueBrowseField(JValueTextField<T> field, String browseText, final Supplier<T> browseSupplier)
+		private JValueBrowseField(JValueTextField<T> field, String browseText, final Supplier<T> browseSupplier)
 		{
 			super();
 			setLayout(new BorderLayout());
@@ -433,7 +633,7 @@ public class ValueFieldFactory
 		 * Creates a new text field.
 		 * @param initialValue the initial value.
 		 */
-		public JValueTextField(T initialValue)
+		private JValueTextField(T initialValue)
 		{
 			this();
 			setValue(initialValue);
@@ -444,9 +644,7 @@ public class ValueFieldFactory
 		 */
 		public JValueTextField()
 		{
-			setLayout(new BorderLayout());
 			this.textField = new JTextField();
-			
 			this.textField.addFocusListener(new FocusAdapter()
 			{
 				@Override
@@ -479,7 +677,8 @@ public class ValueFieldFactory
 				}
 			});
 			
-			add(this.textField);
+			setLayout(new BorderLayout());
+			add(BorderLayout.CENTER, this.textField);
 		}
 		
 		/**

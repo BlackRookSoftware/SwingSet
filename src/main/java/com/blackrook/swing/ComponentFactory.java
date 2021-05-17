@@ -5,7 +5,6 @@
  ******************************************************************************/
 package com.blackrook.swing;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Array;
@@ -880,8 +879,6 @@ public final class ComponentFactory
 		return out;
 	}
 
-	
-
 	/* ==================================================================== */
 
 	/**
@@ -1015,7 +1012,7 @@ public final class ComponentFactory
 	 * @param selectionModel the list selection model.
 	 * @return the list component.
 	 */
-	public static <E> Component list(ListModel<E> model, ListCellRenderer<E> renderer, ListSelectionModel selectionModel)
+	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, ListSelectionModel selectionModel)
 	{
 		JList<E> out = new JList<>(model);
 		out.setCellRenderer(renderer);
@@ -1132,5 +1129,9 @@ public final class ComponentFactory
 	{
 		return new JTable(model, columnModel);
 	}
+	
+	/* ==================================================================== */
+
+	
 	
 }

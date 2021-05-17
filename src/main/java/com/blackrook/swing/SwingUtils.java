@@ -13,9 +13,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.function.Consumer;
 
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * Filled with common Swing functions and calls for convenience.
@@ -75,7 +77,7 @@ public final class SwingUtils
 	 */
 	public static void error(String message)
 	{
-		error(message,null);
+		error(null, message);
 	}
 
 	/**
@@ -84,7 +86,7 @@ public final class SwingUtils
 	 */
 	public static void warning(String message)
 	{
-		warning(message,null);
+		warning(null, message);
 	}
 
 	/**
@@ -93,7 +95,7 @@ public final class SwingUtils
 	 */
 	public static void info(String message)
 	{
-		info(message,null);
+		info(null, message);
 	}
 
 	/**
@@ -103,7 +105,7 @@ public final class SwingUtils
 	 */
 	public static boolean yesTo(String message)
 	{
-		return yesTo(message, null);
+		return yesTo(null, message);
 	}
 
 	/**
@@ -120,27 +122,27 @@ public final class SwingUtils
 
 	/**
 	 * Show an alert window.
-	 * @param message The message to show.
 	 * @param parent Parent component of this dialog.
+	 * @param message The message to show.
 	 */
-	public static void error(String message, Component parent)
+	public static void error(Component parent, String message)
 	{
 		Toolkit.getDefaultToolkit().beep();
 		JOptionPane.showMessageDialog(
-			    parent,message,"Alert",
+			    parent, message, "Alert",
 			    JOptionPane.ERROR_MESSAGE);
 	}
 
 	/**
 	 * Show a warning window.
-	 * @param message The message to show.
 	 * @param parent Parent component of this dialog.
+	 * @param message The message to show.
 	 */
-	public static void warning(String message, Component parent)
+	public static void warning(Component parent, String message)
 	{
 		Toolkit.getDefaultToolkit().beep();
 		JOptionPane.showMessageDialog(
-			    parent,message,"Warning",
+			    parent, message, "Warning",
 			    JOptionPane.WARNING_MESSAGE);
 	}
 
@@ -149,11 +151,11 @@ public final class SwingUtils
 	 * @param message The message to show.
 	 * @param parent Parent component of this dialog.
 	 */
-	public static void info(String message, Component parent)
+	public static void info(Component parent, String message)
 	{
 		Toolkit.getDefaultToolkit().beep();
 		JOptionPane.showMessageDialog(
-			    parent,message,"Info",
+			    parent, message, "Info",
 			    JOptionPane.INFORMATION_MESSAGE);
 	}
 
@@ -163,7 +165,7 @@ public final class SwingUtils
 	 * @param parent Parent component of this dialog.
 	 * @return true if "yes" was clicked. false otherwise.
 	 */
-	public static boolean yesTo(String message, Component parent)
+	public static boolean yesTo(Component parent, String message)
 	{
 		int c = JOptionPane.showConfirmDialog(
 			    parent, 
@@ -183,11 +185,49 @@ public final class SwingUtils
 	 * @param parent Parent component of this dialog.
 	 * @return true if "no" was clicked. false otherwise.
 	 */
-	public static boolean noTo(String message, Component parent)
+	public static boolean noTo(Component parent, String message)
 	{
-		return !yesTo(message,parent);
+		return !yesTo(parent, message);
 	}
 
+	/**
+	 * Opens a file chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(Component parent, String approveText, FileFilter ... choosableFilters)
+	{
+		return file(parent, null, approveText, choosableFilters);
+	}
+	
+	/**
+	 * Opens a file chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(Component parent, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		JFileChooser jfc = new JFileChooser();
+		if (initPath != null)
+			jfc.setSelectedFile(initPath);
+		for (FileFilter filter : choosableFilters)
+			jfc.addChoosableFileFilter(filter);
+		switch (jfc.showDialog(parent, approveText))
+		{
+			default:
+			case JFileChooser.CANCEL_OPTION: 
+			case JFileChooser.ERROR_OPTION:
+				return null;
+			case JFileChooser.APPROVE_OPTION:
+				return jfc.getSelectedFile();
+		}
+	}
+	
 	/**
 	 * Attempts to open a file using the default associated opening program.
 	 * Returns false if unsuccessful, true otherwise.
