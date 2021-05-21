@@ -73,55 +73,6 @@ public final class SwingUtils
 	
 	/**
 	 * Show an alert window.
-	 * @param message The message to show.
-	 */
-	public static void error(String message)
-	{
-		error(null, message);
-	}
-
-	/**
-	 * Show an warning window.
-	 * @param message The message to show.
-	 */
-	public static void warning(String message)
-	{
-		warning(null, message);
-	}
-
-	/**
-	 * Show an info window.
-	 * @param message The message to show.
-	 */
-	public static void info(String message)
-	{
-		info(null, message);
-	}
-
-	/**
-	 * Displays a confirmation window asking a user a yes or no question.
-	 * @param message the message to show.
-	 * @return true if "yes" was clicked. false otherwise.
-	 */
-	public static boolean yesTo(String message)
-	{
-		return yesTo(null, message);
-	}
-
-	/**
-	 * Displays a confirmation window asking a user a yes or no question.
-	 * This is a convenience method for code readability, and is completely
-	 * equivalent to <code>!yesTo(message)</code>.
-	 * @param message the message to show.
-	 * @return true if "no" was clicked. false otherwise.
-	 */
-	public static boolean noTo(String message)
-	{
-		return !yesTo(message);
-	}
-
-	/**
-	 * Show an alert window.
 	 * @param parent Parent component of this dialog.
 	 * @param message The message to show.
 	 */
@@ -191,30 +142,70 @@ public final class SwingUtils
 	}
 
 	/**
-	 * Opens a file chooser dialog.
-	 * @param parent the parent component for the chooser modal.
-	 * @param approveText the text to put on the approval button.
-	 * @param choosableFilters the choosable filters.
-	 * @return the selected file, or null if no file was selected for whatever reason.
+	 * Show an alert window.
+	 * @param message The message to show.
 	 */
-	public static File file(Component parent, String approveText, FileFilter ... choosableFilters)
+	public static void error(String message)
 	{
-		return file(parent, null, approveText, choosableFilters);
+		error(null, message);
 	}
-	
+
+	/**
+	 * Show an warning window.
+	 * @param message The message to show.
+	 */
+	public static void warning(String message)
+	{
+		warning(null, message);
+	}
+
+	/**
+	 * Show an info window.
+	 * @param message The message to show.
+	 */
+	public static void info(String message)
+	{
+		info(null, message);
+	}
+
+	/**
+	 * Displays a confirmation window asking a user a yes or no question.
+	 * @param message the message to show.
+	 * @return true if "yes" was clicked. false otherwise.
+	 */
+	public static boolean yesTo(String message)
+	{
+		return yesTo(null, message);
+	}
+
+	/**
+	 * Displays a confirmation window asking a user a yes or no question.
+	 * This is a convenience method for code readability, and is completely
+	 * equivalent to <code>!yesTo(message)</code>.
+	 * @param message the message to show.
+	 * @return true if "no" was clicked. false otherwise.
+	 */
+	public static boolean noTo(String message)
+	{
+		return !yesTo(message);
+	}
+
 	/**
 	 * Opens a file chooser dialog.
 	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
 	 * @param initPath the initial path for the file chooser.
 	 * @param approveText the text to put on the approval button.
 	 * @param choosableFilters the choosable filters.
 	 * @return the selected file, or null if no file was selected for whatever reason.
 	 */
-	public static File file(Component parent, File initPath, String approveText, FileFilter ... choosableFilters)
+	public static File file(Component parent, String title, File initPath, String approveText, FileFilter ... choosableFilters)
 	{
 		JFileChooser jfc = new JFileChooser();
 		if (initPath != null)
 			jfc.setSelectedFile(initPath);
+		if (title != null)
+			jfc.setDialogTitle(title);
 		for (FileFilter filter : choosableFilters)
 			jfc.addChoosableFileFilter(filter);
 		switch (jfc.showDialog(parent, approveText))
@@ -227,7 +218,106 @@ public final class SwingUtils
 				return jfc.getSelectedFile();
 		}
 	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(Component parent, String title, String approveText, FileFilter ... choosableFilters)
+	{
+		return file(parent, title, null, approveText, choosableFilters);
+	}
 	
+	/**
+	 * Opens a file chooser dialog.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(String title, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return file(null, title, initPath, approveText, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(String title, String approveText, FileFilter ... choosableFilters)
+	{
+		return file(null, title, null, approveText, choosableFilters);
+	}
+	
+	/**
+	 * Opens a file chooser dialog.
+	 * @param title the dialog title.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(String title, FileFilter ... choosableFilters)
+	{
+		return file(null, title, null, null, choosableFilters);
+	}
+	
+	/**
+	 * Opens a file chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(Component parent, File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return file(parent, null, null, approveText, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param parent the parent component for the chooser modal.
+	 * @param title the dialog title.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(Component parent, String approveText, FileFilter ... choosableFilters)
+	{
+		return file(parent, null, null, approveText, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param title the dialog title.
+	 * @param initPath the initial path for the file chooser.
+	 * @param approveText the text to put on the approval button.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(File initPath, String approveText, FileFilter ... choosableFilters)
+	{
+		return file(null, null, initPath, approveText, choosableFilters);
+	}
+
+	/**
+	 * Opens a file chooser dialog.
+	 * @param title the dialog title.
+	 * @param choosableFilters the choosable filters.
+	 * @return the selected file, or null if no file was selected for whatever reason.
+	 */
+	public static File file(FileFilter ... choosableFilters)
+	{
+		return file(null, null, null, null, choosableFilters);
+	}
+
 	/**
 	 * Attempts to open a file using the default associated opening program.
 	 * Returns false if unsuccessful, true otherwise.

@@ -6,16 +6,22 @@
 package com.blackrook.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -24,7 +30,9 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 /**
  * A field factory that creates form fields.
@@ -48,11 +56,11 @@ public class FormFactory
 	/**
 	 * Creates a new text field that stores a string type.
 	 * Nulls are converted to empty string.
-	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<String> stringTextField(final boolean nullable, final String initialValue)
+	public static JFormField<String> stringTextField(final String initialValue, final boolean nullable)
 	{
 		return new JValueTextField<String>(initialValue) 
 		{
@@ -75,11 +83,11 @@ public class FormFactory
 	/**
 	 * Creates a new text field that stores an double type.
 	 * A blank value means null.
-	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Double> doubleTextField(final boolean nullable, final Double initialValue)
+	public static JFormField<Double> doubleTextField(final Double initialValue, final boolean nullable)
 	{
 		return new JValueTextField<Double>(initialValue) 
 		{
@@ -106,11 +114,11 @@ public class FormFactory
 	/**
 	 * Creates a new text field that stores a float type.
 	 * A blank value means null.
-	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Float> floatTextField(final boolean nullable, final Float initialValue)
+	public static JFormField<Float> floatTextField(final Float initialValue, final boolean nullable)
 	{
 		return new JValueTextField<Float>(initialValue) 
 		{
@@ -137,11 +145,11 @@ public class FormFactory
 	/**
 	 * Creates a new text field that stores an long integer type.
 	 * A blank value means null.
-	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Long> longTextField(final boolean nullable, final Long initialValue)
+	public static JFormField<Long> longTextField(final Long initialValue, final boolean nullable)
 	{
 		return new JValueTextField<Long>(initialValue) 
 		{
@@ -168,11 +176,11 @@ public class FormFactory
 	/**
 	 * Creates a new text field that stores an integer type.
 	 * A blank value means null.
-	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Integer> integerTextField(final boolean nullable, final Integer initialValue)
+	public static JFormField<Integer> integerTextField(final Integer initialValue, final boolean nullable)
 	{
 		return new JValueTextField<Integer>(initialValue) 
 		{
@@ -199,11 +207,11 @@ public class FormFactory
 	/**
 	 * Creates a new text field that stores a short type.
 	 * A blank value means null.
-	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Short> shortTextField(final boolean nullable, final Short initialValue)
+	public static JFormField<Short> shortTextField(final Short initialValue, final boolean nullable)
 	{
 		return new JValueTextField<Short>(initialValue) 
 		{
@@ -230,11 +238,11 @@ public class FormFactory
 	/**
 	 * Creates a new text field that stores a byte type.
 	 * A blank value means null.
-	 * @param nullable if true, this is a nullable field.
 	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Byte> byteTextField(final boolean nullable, final Byte initialValue)
+	public static JFormField<Byte> byteTextField(final Byte initialValue, final boolean nullable)
 	{
 		return new JValueTextField<Byte>(initialValue) 
 		{
@@ -261,6 +269,38 @@ public class FormFactory
 	/* ==================================================================== */
 
 	/**
+	 * Creates a form field from a text area.
+	 * @param textArea the text area to encapsulate.
+	 * @return a new form field that encapsulates a text area.
+	 */
+	public static JFormField<String> textAreaField(final JTextArea textArea)
+	{
+		return new JFormField<String>() 
+		{
+			private static final long serialVersionUID = 2756507116966376754L;
+			
+			private JTextArea field;
+			
+			{
+				setLayout(new BorderLayout());
+				add(BorderLayout.CENTER, this.field = textArea);
+			}
+			
+			@Override
+			public String getValue()
+			{
+				return field.getText();
+			}
+
+			@Override
+			public void setValue(String value)
+			{
+				field.setText(value);
+			}
+		};
+	}
+
+	/**
 	 * Creates a form field from a check box.
 	 * @param checkBox the checkbox to encapsulate.
 	 * @return a new form field that encapsulates a checkbox.
@@ -274,9 +314,8 @@ public class FormFactory
 			private JCheckBox field;
 			
 			{
-				this.field = checkBox;
 				setLayout(new BorderLayout());
-				add(BorderLayout.CENTER, this.field);
+				add(BorderLayout.CENTER, this.field = checkBox);
 			}
 			
 			@Override
@@ -295,20 +334,6 @@ public class FormFactory
 	
 	/**
 	 * Creates a form field from a slider.
-	 * @param slider the slider to encapsulate.
-	 * @return a new form field that encapsulates a slider.
-	 */
-	public static JFormField<Integer> sliderField(final JSlider slider)
-	{
-		return sliderField(
-			String.valueOf(slider.getModel().getMinimum()),
-			String.valueOf(slider.getModel().getMaximum()),
-			slider
-		);
-	}
-	
-	/**
-	 * Creates a form field from a slider.
 	 * @param minLabel the minimum value label.
 	 * @param maxLabel the maximum value label.
 	 * @param slider the slider to encapsulate.
@@ -323,11 +348,10 @@ public class FormFactory
 			private JSlider field;
 			
 			{
-				this.field = slider;
 				setLayout(new BorderLayout());
 				if (minLabel != null)
 					add(BorderLayout.WEST, new JLabel(minLabel));
-				add(BorderLayout.CENTER, this.field);
+				add(BorderLayout.CENTER, this.field = slider);
 				if (maxLabel != null)
 					add(BorderLayout.EAST, new JLabel(maxLabel));
 			}
@@ -347,6 +371,20 @@ public class FormFactory
 	}
 	
 	/**
+	 * Creates a form field from a slider.
+	 * @param slider the slider to encapsulate.
+	 * @return a new form field that encapsulates a slider.
+	 */
+	public static JFormField<Integer> sliderField(final JSlider slider)
+	{
+		return sliderField(
+			String.valueOf(slider.getModel().getMinimum()),
+			String.valueOf(slider.getModel().getMaximum()),
+			slider
+		);
+	}
+
+	/**
 	 * Creates a form field from a spinner.
 	 * @param <T> the spinner return type.
 	 * @param spinner the spinner to encapsulate.
@@ -361,9 +399,8 @@ public class FormFactory
 			private JSpinner field;
 			
 			{
-				this.field = spinner;
 				setLayout(new BorderLayout());
-				add(BorderLayout.CENTER, this.field);
+				add(BorderLayout.CENTER, this.field = spinner);
 			}
 			
 			@Override
@@ -374,7 +411,7 @@ public class FormFactory
 			}
 
 			@Override
-			public void setValue(T value)
+			public void setValue(Object value)
 			{
 				field.setValue(value);
 			}
@@ -396,9 +433,8 @@ public class FormFactory
 			private JComboBox<T> field;
 			
 			{
-				this.field = comboBox;
 				setLayout(new BorderLayout());
-				add(BorderLayout.CENTER, this.field);
+				add(BorderLayout.CENTER, this.field = comboBox);
 			}
 			
 			@Override
@@ -409,7 +445,7 @@ public class FormFactory
 			}
 
 			@Override
-			public void setValue(T value)
+			public void setValue(Object value)
 			{
 				field.setSelectedItem(value);
 			}
@@ -431,9 +467,8 @@ public class FormFactory
 			private JList<T> field;
 			
 			{
-				this.field = list;
 				setLayout(new BorderLayout());
-				add(BorderLayout.CENTER, this.field);
+				add(BorderLayout.CENTER, this.field = list);
 			}
 			
 			@Override
@@ -443,7 +478,7 @@ public class FormFactory
 			}
 
 			@Override
-			public void setValue(T value)
+			public void setValue(Object value)
 			{
 				field.setSelectedValue(value, true);
 			}
@@ -452,6 +487,20 @@ public class FormFactory
 	
 	/* ==================================================================== */
 	
+	/**
+	 * Creates a form panel.
+	 * @param labelSide the label side.
+	 * @param labelJustification the label justification.
+	 * @param labelWidth the label width.
+	 * @return a new form panel.
+	 */
+	public static JFormPanel form(JFormPanel.LabelSide labelSide, JFormPanel.LabelJustification labelJustification, int labelWidth)
+	{
+		return new JFormPanel(labelSide, labelJustification, labelWidth);
+	}
+	
+	/* ==================================================================== */
+
 	/**
 	 * A single form.
 	 */
@@ -473,9 +522,19 @@ public class FormFactory
 		 */
 		public enum LabelJustification
 		{
-			LEFT,
-			CENTER,
-			RIGHT;
+			LEFT(SwingConstants.LEFT),
+			CENTER(SwingConstants.CENTER),
+			RIGHT(SwingConstants.RIGHT),
+			LEADING(SwingConstants.LEADING),
+			TRAILING(SwingConstants.TRAILING);
+			
+			private int alignment;
+			
+			private LabelJustification(int alignment)
+			{
+				this.alignment = alignment;
+			}
+			
 		}
 
 		private LabelSide labelSide;
@@ -483,6 +542,88 @@ public class FormFactory
 		private int labelWidth;
 		private Map<Object, JFormField<?>> fieldValueMap;
 		
+		private JFormPanel(LabelSide labelSide, LabelJustification labelJustification, int labelWidth)
+		{
+			this.labelSide = labelSide;
+			this.labelJustification = labelJustification;
+			this.labelWidth = labelWidth;
+			this.fieldValueMap = new HashMap<>();
+			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		}
+
+		/**
+		 * Adds a field to this form panel.
+		 * @param <V>
+		 * @param key the the object key to fetch/set values with.
+		 * @param labelText the form label text.
+		 * @param field the field to set for the form.
+		 * @return this panel.
+		 */
+		public <V> JFormPanel addField(Object key, String labelText, JFormField<V> field)
+		{
+			JFormFieldPanel<V> panel;
+			JLabel label = new JLabel(labelText);
+			label.setHorizontalAlignment(labelJustification.alignment);
+			label.setVerticalAlignment(JLabel.CENTER);
+			label.setPreferredSize(new Dimension(labelWidth, 0));
+			switch (labelSide)
+			{
+				default:
+				case LEFT:
+					panel = new JFormFieldPanel<>(label, field);
+					break;
+				case RIGHT:
+					panel = new JFormFieldPanel<>(field, label);
+					break;
+			}
+			fieldValueMap.put(key, panel);
+			add(panel);
+			return this;
+		}
+		
+		/**
+		 * Gets a form value by an associated key.
+		 * @param key the key to use.
+		 * @return the form field value (can be null), or null if it doesn't exist.
+		 */
+		public Object getValue(Object key)
+		{
+			JFormField<?> field = fieldValueMap.get(key);
+			return field == null ? null : field.getValue();
+		}
+		
+		/**
+		 * Sets a form value by an associated key.
+		 * If the key does not correspond to a value, this does nothing.
+		 * @param key the key to use.
+		 * @param value the value to set.
+		 */
+		public <V> void setValue(Object key, V value)
+		{
+			JFormField<?> field;
+			if ((field = fieldValueMap.get(key)) != null)
+			{
+				Method m;
+				try {
+					m = field.getClass().getMethod("setValue", value.getClass());
+					m.invoke(field, value);
+				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new ClassCastException("Could not set form field: " + e.getLocalizedMessage());
+				}
+			}
+		}
+		
+		/**
+		 * Gets a form value by an associated key, cast to a specific type.
+		 * @param <T> the return type. 
+		 * @param type the class type to cast to.
+		 * @param key the key to use.
+		 * @return the form field value (can be null), or null if it doesn't exist.
+		 */
+		public <T> T getValue(Class<T> type, Object key)
+		{
+			return type.cast(getValue(key));
+		}
 		
 	}
 	
@@ -521,6 +662,7 @@ public class FormFactory
 		private JFormFieldPanel(JLabel label, JFormField<T> field)
 		{
 			super();
+			setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 			setLayout(new BorderLayout());
 			add(this.label = label, BorderLayout.WEST);
 			add(this.formField = field, BorderLayout.CENTER);
@@ -529,6 +671,7 @@ public class FormFactory
 		private JFormFieldPanel(JFormField<T> field, JLabel label)
 		{
 			super();
+			setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 			setLayout(new BorderLayout());
 			add(this.formField = field, BorderLayout.CENTER);
 			add(this.label = label, BorderLayout.EAST);
@@ -609,7 +752,7 @@ public class FormFactory
 		}
 	
 		@Override
-		public void setValue(T value) 
+		public void setValue(Object value) 
 		{
 			field.setValue(value);
 		}
@@ -625,7 +768,7 @@ public class FormFactory
 		private static final long serialVersionUID = -8674796823012708679L;
 		
 		/** The stored value. */
-		private T value;
+		private Object value;
 		/** The stored value. */
 		private JTextField textField;
 		
@@ -705,16 +848,18 @@ public class FormFactory
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public T getValue()
 		{
-			return value;
+			return (T)value;
 		}
 		
 		@Override
-		public void setValue(T value)
+		@SuppressWarnings("unchecked")
+		public void setValue(Object value)
 		{
 			this.value = value;
-			textField.setText(getTextFromValue(value));
+			textField.setText(getTextFromValue((T)value));
 		}
 		
 		// Refreshes an entered value.

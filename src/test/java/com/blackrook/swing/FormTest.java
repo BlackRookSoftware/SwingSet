@@ -7,12 +7,9 @@ package com.blackrook.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 
-import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JSlider;
-import javax.swing.border.BevelBorder;
 
 import static com.blackrook.swing.SwingUtils.*;
 import static com.blackrook.swing.ContainerFactory.*;
@@ -25,25 +22,21 @@ public final class FormTest
 	{
 		SwingUtils.setSystemLAF();
 		
-		ComponentChangeHandler<JSlider> SLIDER_VALUE_PRINTER = (s)->{
-			if (s.getValueIsAdjusting())
-				System.out.println(s.getValue());
-		};
+		Dimension d = new Dimension(256, 20);
+		JSlider slider1 = apply(slider(sliderModel(50, 0, 0, 100)), (s) -> {s.setPreferredSize(d);});
+		JSlider slider2 = apply(slider(sliderModel(50, 0, 0, 100)), (s) -> {s.setPreferredSize(d);});
+		JSlider slider3 = apply(slider(sliderModel(50, 0, 0, 100)), (s) -> {s.setPreferredSize(d);});
+		
+		JFormPanel form = form(JFormPanel.LabelSide.LEFT, JFormPanel.LabelJustification.RIGHT, 64)
+			.addField(0, "Junk", sliderField(slider1))
+			.addField(1, "Junk", sliderField(slider2))
+			.addField(2, "Junk", sliderField(slider3))
+		;
 		
 		JFrame f = frame("Test",
 			containerOf(
-				node(new Dimension(256, 256), new BorderLayout(),
-					node(BorderLayout.CENTER, new FlowLayout(),
-						node(apply(shortTextField(false, (short)0), (s)->{
-							s.setPreferredSize(new Dimension(100, 20));
-						})),
-						node(sliderField(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER))),
-						node(sliderField(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER))),
-						node(
-							BorderFactory.createBevelBorder(BevelBorder.LOWERED),
-							node(textField("this is stuff"))
-						)
-					)
+				node(new BorderLayout(),
+					node(BorderLayout.CENTER, form)
 				)
 			)
 		);

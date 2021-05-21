@@ -349,30 +349,6 @@ public final class ComponentFactory
 
 	/**
 	 * Creates a button.
-	 * @param mnemonic the button mnemonic.
-	 * @param action the action on the button.
-	 * @return a new button.
-	 */
-	public static JButton button(int mnemonic, Action action)
-	{
-		JButton out = new JButton(action);
-		if (mnemonic > 0)
-			out.setMnemonic(mnemonic);
-		return out;
-	}
-
-	/**
-	 * Creates a button.
-	 * @param action the action on the button.
-	 * @return a new button.
-	 */
-	public static JButton button(Action action)
-	{
-		return button(0, action);
-	}
-	
-	/**
-	 * Creates a button.
 	 * @param icon the check box icon.
 	 * @param label the check box label.
 	 * @param mnemonic the button mnemonic.
@@ -445,21 +421,32 @@ public final class ComponentFactory
 		return button(label, 0, handler);
 	}
 	
-	/* ==================================================================== */
-
 	/**
-	 * Creates a checkbox.
-	 * @param selected the selected state.
-	 * @param action the action for the menu item.
-	 * @return a new checkbox.
+	 * Creates a button.
+	 * @param mnemonic the button mnemonic.
+	 * @param action the action on the button.
+	 * @return a new button.
 	 */
-	public static JCheckBox checkBox(boolean selected, Action action)
+	public static JButton button(int mnemonic, Action action)
 	{
-		JCheckBox out = new JCheckBox(action);
-		out.setSelected(selected);
+		JButton out = new JButton(action);
+		if (mnemonic > 0)
+			out.setMnemonic(mnemonic);
 		return out;
 	}
 
+	/**
+	 * Creates a button.
+	 * @param action the action on the button.
+	 * @return a new button.
+	 */
+	public static JButton button(Action action)
+	{
+		return button(0, action);
+	}
+
+	/* ==================================================================== */
+	
 	/**
 	 * Creates a check box.
 	 * @param icon the check box icon.
@@ -506,6 +493,33 @@ public final class ComponentFactory
 	/* ==================================================================== */
 
 	/**
+	 * Creates a checkbox.
+	 * @param selected the selected state.
+	 * @param action the action for the checkbox.
+	 * @return a new checkbox.
+	 */
+	public static JCheckBox checkBox(boolean selected, Action action)
+	{
+		JCheckBox out = new JCheckBox(action);
+		out.setSelected(selected);
+		return out;
+	}
+
+	/* ==================================================================== */
+	
+	/**
+	 * Creates a check box.
+	 * @param selected the selected state.
+	 * @return a new check box.
+	 */
+	public static JCheckBox checkBox(boolean selected)
+	{
+		JCheckBox out = new JCheckBox();
+		out.setSelected(selected);
+		return out;
+	}
+
+	/**
 	 * Creates a new range model for a slider.
 	 * @param value the current value.
 	 * @param extent the length of the inner range that begins at the model's value.
@@ -529,7 +543,8 @@ public final class ComponentFactory
 	{
 		JSlider out = new JSlider(rangeModel);
 		out.setOrientation(orientation);
-		out.addChangeListener(handler);
+		if (handler != null)
+			out.addChangeListener(handler);
 		return out;
 	}
 	
@@ -541,10 +556,28 @@ public final class ComponentFactory
 	 */
 	public static JSlider slider(BoundedRangeModel rangeModel, ComponentChangeHandler<JSlider> handler)
 	{
-		JSlider out = new JSlider(rangeModel);
-		out.setOrientation(JSlider.HORIZONTAL);
-		out.addChangeListener(handler);
-		return out;
+		return slider(JSlider.HORIZONTAL, rangeModel, handler);
+	}
+	
+	/**
+	 * Creates a value slider.
+	 * @param orientation the orientation type.
+	 * @param rangeModel the range model for the slider.
+	 * @return a new slider.
+	 */
+	public static JSlider slider(int orientation, BoundedRangeModel rangeModel)
+	{
+		return slider(orientation, rangeModel, null);
+	}
+	
+	/**
+	 * Creates a horizontal value slider.
+	 * @param rangeModel the range model for the slider.
+	 * @return a new slider.
+	 */
+	public static JSlider slider(BoundedRangeModel rangeModel)
+	{
+		return slider(rangeModel, null);
 	}
 	
 	/* ==================================================================== */
@@ -658,8 +691,7 @@ public final class ComponentFactory
 	 */
 	public static JTextArea textArea(int rows, int columns)
 	{
-		JTextArea out = new JTextArea(rows, columns);
-		return out;
+		return new JTextArea(rows, columns);
 	}
 
 	/**
@@ -707,12 +739,13 @@ public final class ComponentFactory
 	/**
 	 * Creates a new TextField.
 	 * @param text the default starting text contained.
-	 * @param columns the amount of columns.
+	 * @param handler the listener for all document changes.
 	 * @return a new text field.
 	 */
-	public static JTextField textField(String text, int columns)
+	public static JTextField textField(String text, DocumentHandler<JTextArea> handler)
 	{
-		JTextField out = new JTextField(text, columns);
+		JTextField out = new JTextField(text);
+		out.getDocument().addDocumentListener(handler);
 		return out;
 	}
 
@@ -731,14 +764,35 @@ public final class ComponentFactory
 
 	/**
 	 * Creates a new TextField.
-	 * @param text the default starting text contained.
 	 * @param handler the listener for all document changes.
 	 * @return a new text field.
 	 */
-	public static JTextField textField(String text, DocumentHandler<JTextArea> handler)
+	public static JTextField textField(DocumentHandler<JTextArea> handler)
+	{
+		JTextField out = new JTextField();
+		out.getDocument().addDocumentListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param text the default starting text contained.
+	 * @param columns the amount of columns.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(String text, int columns)
+	{
+		return new JTextField(text, columns);
+	}
+
+	/**
+	 * Creates a new TextField.
+	 * @param text the default starting text contained.
+	 * @return a new text field.
+	 */
+	public static JTextField textField(String text)
 	{
 		JTextField out = new JTextField(text);
-		out.getDocument().addDocumentListener(handler);
 		return out;
 	}
 
@@ -755,35 +809,11 @@ public final class ComponentFactory
 
 	/**
 	 * Creates a new TextField.
-	 * @param text the default starting text contained.
-	 * @return a new text field.
-	 */
-	public static JTextField textField(String text)
-	{
-		JTextField out = new JTextField(text);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextField.
-	 * @param handler the listener for all document changes.
-	 * @return a new text field.
-	 */
-	public static JTextField textField(DocumentHandler<JTextArea> handler)
-	{
-		JTextField out = new JTextField();
-		out.getDocument().addDocumentListener(handler);
-		return out;
-	}
-
-	/**
-	 * Creates a new TextField.
 	 * @return a new text field.
 	 */
 	public static JTextField textField()
 	{
-		JTextField out = new JTextField();
-		return out;
+		return new JTextField();
 	}
 
 	/* ==================================================================== */
