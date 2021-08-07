@@ -27,7 +27,7 @@ public final class FormTest
 		JSlider slider2 = apply(slider(sliderModel(50, 0, 0, 100)), (s) -> {s.setPreferredSize(d);});
 		JSlider slider3 = apply(slider(sliderModel(50, 0, 0, 100)), (s) -> {s.setPreferredSize(d);});
 		
-		JFormPanel form = form(JFormPanel.LabelSide.LEFT, JFormPanel.LabelJustification.RIGHT, 64)
+		JFormPanel form = form(JFormPanel.LabelSide.LEFT, JFormPanel.LabelJustification.LEFT, 128)
 			.addField(0, "Junk", sliderField(slider1))
 			.addField(1, "Junk", sliderField(slider2))
 			.addField(2, "Junk", sliderField(slider3))

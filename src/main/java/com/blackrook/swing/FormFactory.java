@@ -566,6 +566,7 @@ public class FormFactory
 			label.setHorizontalAlignment(labelJustification.alignment);
 			label.setVerticalAlignment(JLabel.CENTER);
 			label.setPreferredSize(new Dimension(labelWidth, 0));
+			
 			switch (labelSide)
 			{
 				default:
@@ -662,8 +663,8 @@ public class FormFactory
 		private JFormFieldPanel(JLabel label, JFormField<T> field)
 		{
 			super();
-			setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
-			setLayout(new BorderLayout());
+			setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+			setLayout(new BorderLayout(4, 0));
 			add(this.label = label, BorderLayout.WEST);
 			add(this.formField = field, BorderLayout.CENTER);
 		}
