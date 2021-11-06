@@ -284,7 +284,6 @@ public final class SwingUtils
 	/**
 	 * Opens a file chooser dialog.
 	 * @param parent the parent component for the chooser modal.
-	 * @param title the dialog title.
 	 * @param approveText the text to put on the approval button.
 	 * @param choosableFilters the choosable filters.
 	 * @return the selected file, or null if no file was selected for whatever reason.
@@ -296,7 +295,6 @@ public final class SwingUtils
 
 	/**
 	 * Opens a file chooser dialog.
-	 * @param title the dialog title.
 	 * @param initPath the initial path for the file chooser.
 	 * @param approveText the text to put on the approval button.
 	 * @param choosableFilters the choosable filters.
@@ -309,7 +307,6 @@ public final class SwingUtils
 
 	/**
 	 * Opens a file chooser dialog.
-	 * @param title the dialog title.
 	 * @param choosableFilters the choosable filters.
 	 * @return the selected file, or null if no file was selected for whatever reason.
 	 */
