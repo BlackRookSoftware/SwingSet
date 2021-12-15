@@ -19,7 +19,6 @@ import javax.swing.border.BevelBorder;
 
 import static com.blackrook.swing.SwingUtils.*;
 import static com.blackrook.swing.ContainerFactory.*;
-import static com.blackrook.swing.MenuFactory.*;
 import static com.blackrook.swing.ComponentFactory.*;
 import static com.blackrook.swing.FormFactory.*;
 
