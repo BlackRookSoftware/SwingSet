@@ -1160,8 +1160,4 @@ public final class ComponentFactory
 		return new JTable(model, columnModel);
 	}
 	
-	/* ==================================================================== */
-
-	
-	
 }
