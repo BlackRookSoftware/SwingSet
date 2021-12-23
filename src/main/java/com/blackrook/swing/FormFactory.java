@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Black Rook Software
+ * Copyright (c) 2019-2021 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -38,8 +38,10 @@ import javax.swing.SwingConstants;
  * A field factory that creates form fields.
  * @author Matthew Tropiano
  */
-public class FormFactory
+public final class FormFactory
 {
+	private FormFactory() {}
+	
 	/**
 	 * Creates a new text field that stores a custom value type.
 	 * @param <T> the type that this field stores.
