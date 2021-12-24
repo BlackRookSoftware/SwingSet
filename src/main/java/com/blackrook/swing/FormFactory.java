@@ -12,12 +12,13 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -43,43 +44,229 @@ public final class FormFactory
 	private FormFactory() {}
 	
 	/**
+	 * Creates a new text field that stores a custom value type, with a "browse" 
+	 * button that calls an outside function to set a value.
+	 * @param <T> the type that this field stores.
+	 * @param initialValue the field's initial value.
+	 * @param browseText the text to put in the browse button.
+	 * @param browseFunction the function to call when the browse button is clicked (the parameter is the current value).
+	 * @param converter the converter interface for text to value and back.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static <T> JFormField<T> valueBrowseTextField(T initialValue, String browseText, Function<T, T> browseFunction, JValueConverter<T> converter, JValueChangeListener<T> changeListener)
+	{
+		return new JValueBrowseField<>(initialValue, browseText, browseFunction, converter, changeListener);
+	}
+
+	/**
+	 * Creates a new text field that stores a custom value type, with a "browse" 
+	 * button that calls an outside function to set a value.
+	 * @param <T> the type that this field stores.
+	 * @param initialValue the field's initial value.
+	 * @param browseFunction the function to call when the browse button is clicked (the parameter is the current value).
+	 * @param converter the converter interface for text to value and back.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static <T> JFormField<T> valueBrowseTextField(T initialValue, Function<T, T> browseFunction, JValueConverter<T> converter, JValueChangeListener<T> changeListener)
+	{
+		return valueBrowseTextField(initialValue, "...", browseFunction, converter, changeListener);
+	}
+
+	/**
+	 * Creates a new text field that stores a custom value type, with a "browse" 
+	 * button that calls an outside function to set a value.
+	 * @param <T> the type that this field stores.
+	 * @param initialValue the field's initial value.
+	 * @param browseText the text to put in the browse button.
+	 * @param browseFunction the function to call when the browse button is clicked (the parameter is the current value).
+	 * @param converter the converter interface for text to value and back.
+	 * @return the generated field.
+	 */
+	public static <T> JFormField<T> valueBrowseTextField(T initialValue, String browseText, Function<T, T> browseFunction, JValueConverter<T> converter)
+	{
+		return valueBrowseTextField(initialValue, browseText, browseFunction, converter, null);
+	}
+
+	/**
+	 * Creates a new text field that stores a custom value type, with a "browse" 
+	 * button that calls an outside function to set a value.
+	 * @param <T> the type that this field stores.
+	 * @param initialValue the field's initial value.
+	 * @param browseFunction the function to call when the browse button is clicked (the parameter is the current value).
+	 * @param converter the converter interface for text to value and back.
+	 * @return the generated field.
+	 */
+	public static <T> JFormField<T> valueBrowseTextField(T initialValue, Function<T, T> browseFunction, JValueConverter<T> converter)
+	{
+		return valueBrowseTextField(initialValue, "...", browseFunction, converter, null);
+	}
+
+	/**
+	 * Creates a new text field that stores a custom value type, with a "browse" 
+	 * button that calls an outside function to set a value.
+	 * @param <T> the type that this field stores.
+	 * @param browseText the text to put in the browse button.
+	 * @param browseFunction the function to call when the browse button is clicked (the parameter is the current value).
+	 * @param converter the converter interface for text to value and back.
+	 * @return the generated field.
+	 */
+	public static <T> JFormField<T> valueBrowseTextField(String browseText, Function<T, T> browseFunction, JValueConverter<T> converter)
+	{
+		return valueBrowseTextField(null, browseText, browseFunction, converter, null);
+	}
+
+	/**
+	 * Creates a new text field that stores a custom value type, with a "browse" 
+	 * button that calls an outside function to set a value.
+	 * @param <T> the type that this field stores.
+	 * @param browseFunction the function to call when the browse button is clicked (the parameter is the current value).
+	 * @param converter the converter interface for text to value and back.
+	 * @return the generated field.
+	 */
+	public static <T> JFormField<T> valueBrowseTextField(Function<T, T> browseFunction, JValueConverter<T> converter)
+	{
+		return valueBrowseTextField(null, "...", browseFunction, converter, null);
+	}
+
+	/**
 	 * Creates a new text field that stores a custom value type.
 	 * @param <T> the type that this field stores.
 	 * @param initialValue the field's initial value.
-	 * @param toValueConverter the converter function for text to value.
-	 * @param toStringConverter the converter function for value to text.
+	 * @param converter the converter interface for text to value and back.
+	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the generated field.
 	 */
-	public static <T> JFormField<T> valueTextField(T initialValue, Function<String, T> toValueConverter, Function<T, String> toStringConverter)
+	public static <T> JFormField<T> valueTextField(T initialValue, JValueConverter<T> converter, JValueChangeListener<T> changeListener)
 	{
-		return new CustomValueTextField<T>(initialValue, toValueConverter, toStringConverter);
+		return new JValueTextField<>(initialValue, converter, changeListener);
+	}
+
+	/**
+	 * Creates a new text field that stores a custom value type.
+	 * @param <T> the type that this field stores.
+	 * @param converter the converter interface for text to value and back.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static <T> JFormField<T> valueTextField(JValueConverter<T> converter, JValueChangeListener<T> changeListener)
+	{
+		return valueTextField(null, converter, changeListener);
+	}
+
+	/**
+	 * Creates a new text field that stores a custom value type.
+	 * @param <T> the type that this field stores.
+	 * @param initialValue the field's initial value.
+	 * @param converter the converter interface for text to value and back.
+	 * @return the generated field.
+	 */
+	public static <T> JFormField<T> valueTextField(T initialValue, JValueConverter<T> converter)
+	{
+		return valueTextField(initialValue, converter, null);
+	}
+
+	/**
+	 * Creates a new text field that stores a custom value type.
+	 * @param <T> the type that this field stores.
+	 * @param converter the converter interface for text to value and back.
+	 * @return the generated field.
+	 */
+	public static <T> JFormField<T> valueTextField(JValueConverter<T> converter)
+	{
+		return valueTextField(null, converter);
 	}
 
 	/**
 	 * Creates a new text field that stores a string type.
+	 * Empty strings are considered null if this field is nullable.
+	 * Nulls are converted to empty string.
+	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> stringTextField(String initialValue, final boolean nullable, JValueChangeListener<String> changeListener)
+	{
+		return valueTextField(initialValue, converter(
+			(text) -> {
+				text = text.trim();
+				return text.length() == 0 ? (nullable ? null : "") : text;
+			},
+			(value) -> (
+				value != null ? String.valueOf(value) : ""
+			)
+		), changeListener); 
+	}
+
+	/**
+	 * Creates a new text field that stores a string type.
+	 * @param initialValue the field's initial value.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> stringTextField(String initialValue, JValueChangeListener<String> changeListener)
+	{
+		return stringTextField(initialValue, false, changeListener); 
+	}
+
+	/**
+	 * Creates a new text field that stores a string type.
+	 * Empty strings are considered null if this field is nullable.
 	 * Nulls are converted to empty string.
 	 * @param initialValue the field's initial value.
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<String> stringTextField(final String initialValue, final boolean nullable)
+	public static JFormField<String> stringTextField(String initialValue, final boolean nullable)
 	{
-		return new JValueTextField<String>(initialValue) 
-		{
-			private static final long serialVersionUID = -6772532768586868189L;
+		return stringTextField(initialValue, false, null); 
+	}
 
-			@Override
-			public String getValueFromText(String text)
-			{
-				return text;
-			}
+	/**
+	 * Creates a new text field that stores a string type.
+	 * @param initialValue the field's initial value.
+	 * @return the generated field.
+	 */
+	public static JFormField<String> stringTextField(String initialValue)
+	{
+		return stringTextField(initialValue, false, null); 
+	}
 
-			@Override
-			public String getTextFromValue(String value)
-			{
-				return value != null ? String.valueOf(value) : "";
-			}
-		};
+	/**
+	 * Creates a new text field that stores an double type.
+	 * A blank value means null.
+	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Double> doubleTextField(Double initialValue, final boolean nullable, JValueChangeListener<Double> changeListener)
+	{
+		return valueTextField(initialValue, converter(
+			(text) -> {
+				try {
+					return Double.parseDouble(text.trim());
+				} catch (NumberFormatException e) {
+					return nullable ? null : 0.0;
+				}
+			},
+			(value) -> (
+				value != null ? String.valueOf(value) : (nullable ? "" : "0.0")
+			)
+		), changeListener); 
+	}
+
+	/**
+	 * Creates a new text field that stores an double type.
+	 * @param initialValue the field's initial value.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Double> doubleTextField(Double initialValue, JValueChangeListener<Double> changeListener)
+	{
+		return doubleTextField(initialValue, false, changeListener); 
 	}
 
 	/**
@@ -89,28 +276,54 @@ public final class FormFactory
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Double> doubleTextField(final Double initialValue, final boolean nullable)
+	public static JFormField<Double> doubleTextField(Double initialValue, final boolean nullable)
 	{
-		return new JValueTextField<Double>(initialValue) 
-		{
-			private static final long serialVersionUID = 5237186213856562420L;
+		return doubleTextField(initialValue, nullable, null); 
+	}
 
-			@Override
-			public Double getValueFromText(String text)
-			{
+	/**
+	 * Creates a new text field that stores an double type.
+	 * @param initialValue the field's initial value.
+	 * @return the generated field.
+	 */
+	public static JFormField<Double> doubleTextField(Double initialValue)
+	{
+		return doubleTextField(initialValue, false, null); 
+	}
+
+	/**
+	 * Creates a new text field that stores a float type.
+	 * A blank value means null.
+	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Float> floatTextField(Float initialValue, final boolean nullable, JValueChangeListener<Float> changeListener)
+	{
+		return valueTextField(initialValue, converter(
+			(text) -> {
 				try {
-					return Double.parseDouble(text.trim());
+					return Float.parseFloat(text.trim());
 				} catch (NumberFormatException e) {
-					return nullable ? null : 0.0;
+					return nullable ? null : 0.0f;
 				}
-			}
+			},
+			(value) -> (
+				value != null ? String.valueOf(value) : (nullable ? "" : "0")
+			)
+		), changeListener); 
+	}
 
-			@Override
-			public String getTextFromValue(Double value)
-			{
-				return value != null ? String.valueOf(value) : (nullable ? "" : "0.0");
-			}
-		};
+	/**
+	 * Creates a new text field that stores a float type.
+	 * @param initialValue the field's initial value.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Float> floatTextField(Float initialValue, JValueChangeListener<Float> changeListener)
+	{
+		return floatTextField(initialValue, false, changeListener); 
 	}
 
 	/**
@@ -120,28 +333,54 @@ public final class FormFactory
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Float> floatTextField(final Float initialValue, final boolean nullable)
+	public static JFormField<Float> floatTextField(Float initialValue, final boolean nullable)
 	{
-		return new JValueTextField<Float>(initialValue) 
-		{
-			private static final long serialVersionUID = -1417108042963237218L;
-	
-			@Override
-			public Float getValueFromText(String text)
-			{
+		return floatTextField(initialValue, nullable, null); 
+	}
+
+	/**
+	 * Creates a new text field that stores a float type.
+	 * @param initialValue the field's initial value.
+	 * @return the generated field.
+	 */
+	public static JFormField<Float> floatTextField(Float initialValue)
+	{
+		return floatTextField(initialValue, false, null); 
+	}
+
+	/**
+	 * Creates a new text field that stores an long integer type.
+	 * A blank value means null.
+	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Long> longTextField(Long initialValue, final boolean nullable, JValueChangeListener<Long> changeListener)
+	{
+		return valueTextField(initialValue, converter(
+			(text) -> {
 				try {
-					return Float.parseFloat(text.trim());
+					return Long.parseLong(text.trim());
 				} catch (NumberFormatException e) {
-					return nullable ? null : 0.0f;
+					return nullable ? null : (long)0;
 				}
-			}
-	
-			@Override
-			public String getTextFromValue(Float value)
-			{
-				return value != null ? String.valueOf(value) : (nullable ? "" : "0.0");
-			}
-		};
+			},
+			(value) -> (
+				value != null ? String.valueOf(value) : (nullable ? "" : "0")
+			)
+		), changeListener); 
+	}
+
+	/**
+	 * Creates a new text field that stores an long integer type.
+	 * @param initialValue the field's initial value.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Long> longTextField(Long initialValue, JValueChangeListener<Long> changeListener)
+	{
+		return longTextField(initialValue, false, changeListener); 
 	}
 
 	/**
@@ -151,28 +390,54 @@ public final class FormFactory
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Long> longTextField(final Long initialValue, final boolean nullable)
+	public static JFormField<Long> longTextField(Long initialValue, final boolean nullable)
 	{
-		return new JValueTextField<Long>(initialValue) 
-		{
-			private static final long serialVersionUID = -3677849452789256467L;
+		return longTextField(initialValue, nullable, null); 
+	}
 
-			@Override
-			public Long getValueFromText(String text)
-			{
+	/**
+	 * Creates a new text field that stores an long integer type.
+	 * @param initialValue the field's initial value.
+	 * @return the generated field.
+	 */
+	public static JFormField<Long> longTextField(Long initialValue)
+	{
+		return longTextField(initialValue, false, null); 
+	}
+
+	/**
+	 * Creates a new text field that stores an integer type.
+	 * A blank value means null.
+	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Integer> integerTextField(Integer initialValue, final boolean nullable, JValueChangeListener<Integer> changeListener)
+	{
+		return valueTextField(initialValue, converter(
+			(text) -> {
 				try {
-					return Long.parseLong(text.trim());
+					return Integer.parseInt(text.trim());
 				} catch (NumberFormatException e) {
-					return nullable ? null : 0L;
+					return nullable ? null : 0;
 				}
-			}
+			},
+			(value) -> (
+				value != null ? String.valueOf(value) : (nullable ? "" : "0")
+			)
+		), changeListener); 
+	}
 
-			@Override
-			public String getTextFromValue(Long value)
-			{
-				return value != null ? String.valueOf(value) : (nullable ? "" : "0");
-			}
-		};
+	/**
+	 * Creates a new text field that stores an integer type.
+	 * @param initialValue the field's initial value.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Integer> integerTextField(Integer initialValue, JValueChangeListener<Integer> changeListener)
+	{
+		return integerTextField(initialValue, false, changeListener);
 	}
 
 	/**
@@ -182,28 +447,54 @@ public final class FormFactory
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Integer> integerTextField(final Integer initialValue, final boolean nullable)
+	public static JFormField<Integer> integerTextField(Integer initialValue, boolean nullable)
 	{
-		return new JValueTextField<Integer>(initialValue) 
-		{
-			private static final long serialVersionUID = 2511805994148891136L;
+		return integerTextField(initialValue, nullable, null);
+	}
 
-			@Override
-			public Integer getValueFromText(String text)
-			{
+	/**
+	 * Creates a new text field that stores an integer type.
+	 * @param initialValue the field's initial value.
+	 * @return the generated field.
+	 */
+	public static JFormField<Integer> integerTextField(Integer initialValue)
+	{
+		return integerTextField(initialValue, false, null);
+	}
+
+	/**
+	 * Creates a new text field that stores a short type.
+	 * A blank value means null.
+	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Short> shortTextField(Short initialValue, final boolean nullable, JValueChangeListener<Short> changeListener)
+	{
+		return valueTextField(initialValue, converter(
+			(text) -> {
 				try {
-					return Integer.parseInt(text.trim());
+					return Short.parseShort(text.trim());
 				} catch (NumberFormatException e) {
-					return nullable ? null : 0;
+					return nullable ? null : (short)0;
 				}
-			}
+			},
+			(value) -> (
+				value != null ? String.valueOf(value) : (nullable ? "" : "0")
+			)
+		), changeListener); 
+	}
 
-			@Override
-			public String getTextFromValue(Integer value)
-			{
-				return value != null ? String.valueOf(value) : (nullable ? "" : "0");
-			}
-		};
+	/**
+	 * Creates a new text field that stores a short type.
+	 * @param initialValue the field's initial value.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Short> shortTextField(Short initialValue, JValueChangeListener<Short> changeListener)
+	{
+		return shortTextField(initialValue, false, changeListener); 
 	}
 
 	/**
@@ -213,28 +504,54 @@ public final class FormFactory
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Short> shortTextField(final Short initialValue, final boolean nullable)
+	public static JFormField<Short> shortTextField(Short initialValue, boolean nullable)
 	{
-		return new JValueTextField<Short>(initialValue) 
-		{
-			private static final long serialVersionUID = -8246324851207769036L;
+		return shortTextField(initialValue, nullable, null); 
+	}
 
-			@Override
-			public Short getValueFromText(String text)
-			{
+	/**
+	 * Creates a new text field that stores a short type.
+	 * @param initialValue the field's initial value.
+	 * @return the generated field.
+	 */
+	public static JFormField<Short> shortTextField(Short initialValue)
+	{
+		return shortTextField(initialValue, false, null); 
+	}
+
+	/**
+	 * Creates a new text field that stores a byte type.
+	 * A blank value means null.
+	 * @param initialValue the field's initial value.
+	 * @param nullable if true, this is a nullable field.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Byte> byteTextField(Byte initialValue, final boolean nullable, JValueChangeListener<Byte> changeListener)
+	{
+		return valueTextField(initialValue, converter(
+			(text) -> {
 				try {
-					return Short.parseShort(text.trim());
+					return Byte.parseByte(text.trim());
 				} catch (NumberFormatException e) {
-					return nullable ? null : (short)0;
+					return nullable ? null : (byte)0;
 				}
-			}
+			},
+			(value) -> (
+				value != null ? String.valueOf(value) : (nullable ? "" : "0")
+			)
+		), changeListener);
+	}
 
-			@Override
-			public String getTextFromValue(Short value)
-			{
-				return value != null ? String.valueOf(value) : (nullable ? "" : "0");
-			}
-		};
+	/**
+	 * Creates a new text field that stores a byte type.
+	 * @param initialValue the field's initial value.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the generated field.
+	 */
+	public static JFormField<Byte> byteTextField(Byte initialValue, JValueChangeListener<Byte> changeListener)
+	{
+		return byteTextField(initialValue, false, changeListener); 
 	}
 
 	/**
@@ -244,30 +561,114 @@ public final class FormFactory
 	 * @param nullable if true, this is a nullable field.
 	 * @return the generated field.
 	 */
-	public static JFormField<Byte> byteTextField(final Byte initialValue, final boolean nullable)
+	public static JFormField<Byte> byteTextField(Byte initialValue, boolean nullable)
 	{
-		return new JValueTextField<Byte>(initialValue) 
-		{
-			private static final long serialVersionUID = -1550432765342203835L;
-
-			@Override
-			public Byte getValueFromText(String text)
-			{
-				try {
-					return Byte.parseByte(text.trim());
-				} catch (NumberFormatException e) {
-					return nullable ? null : (byte)0;
-				}
-			}
-
-			@Override
-			public String getTextFromValue(Byte value)
-			{
-				return value != null ? String.valueOf(value) : (nullable ? "" : "0");
-			}
-		};
+		return byteTextField(initialValue, nullable, null); 
 	}
 
+	/**
+	 * Creates a new text field that stores a byte type.
+	 * @param initialValue the field's initial value.
+	 * @return the generated field.
+	 */
+	public static JFormField<Byte> byteTextField(Byte initialValue)
+	{
+		return byteTextField(initialValue, false, null); 
+	}
+
+	/* ==================================================================== */
+
+	/**
+	 * Creates a new file field with a button to browse for a file.
+	 * @param initialValue the field's initial value.
+	 * @param browseText the browse button text.
+	 * @param browseFunction the function to call to browse for a file.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the new file selection field.
+	 */
+	public static JFormField<File> fileField(File initialValue, String browseText, Function<File, File> browseFunction, JValueChangeListener<File> changeListener)
+	{
+		return valueBrowseTextField(initialValue, browseText, browseFunction, 
+			converter(
+				(text) -> {
+					text = text.trim();
+					if (text.length() == 0)
+						return null;
+					return new File(text);
+				},
+				(value) -> value.exists() ? value.getAbsolutePath() : value.getPath()
+			), 
+			changeListener
+		);
+	}
+	
+	/**
+	 * Creates a new file field with a button to browse for a file.
+	 * @param initialValue the field's initial value.
+	 * @param browseFunction the function to call to browse for a file.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the new file selection field.
+	 */
+	public static JFormField<File> fileField(File initialValue, Function<File, File> browseFunction, JValueChangeListener<File> changeListener)
+	{
+		return fileField(initialValue, "...", browseFunction, changeListener);
+	}
+	
+	/**
+	 * Creates a new file field with a button to browse for a file.
+	 * @param browseFunction the function to call to browse for a file.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the new file selection field.
+	 */
+	public static JFormField<File> fileField(Function<File, File> browseFunction, JValueChangeListener<File> changeListener)
+	{
+		return fileField(null, "...", browseFunction, changeListener);
+	}
+	
+	/**
+	 * Creates a new file field with a button to browse for a file.
+	 * @param initialValue the field's initial value.
+	 * @param browseText the browse button text.
+	 * @param browseFunction the function to call to browse for a file.
+	 * @return the new file selection field.
+	 */
+	public static JFormField<File> fileField(File initialValue, String browseText, Function<File, File> browseFunction)
+	{
+		return fileField(initialValue, browseText, browseFunction, null);
+	}
+	
+	/**
+	 * Creates a new file field with a button to browse for a file.
+	 * @param browseText the browse button text.
+	 * @param browseFunction the function to call to browse for a file.
+	 * @return the new file selection field.
+	 */
+	public static JFormField<File> fileField(String browseText, Function<File, File> browseFunction)
+	{
+		return fileField(null, browseText, browseFunction, null);
+	}
+	
+	/**
+	 * Creates a new file field with a button to browse for a file.
+	 * @param initialValue the field's initial value.
+	 * @param browseFunction the function to call to browse for a file.
+	 * @return the new file selection field.
+	 */
+	public static JFormField<File> fileField(File initialValue, Function<File, File> browseFunction)
+	{
+		return fileField(initialValue, "...", browseFunction, null);
+	}
+	
+	/**
+	 * Creates a new file field with a button to browse for a file.
+	 * @param browseFunction the function to call to browse for a file.
+	 * @return the new file selection field.
+	 */
+	public static JFormField<File> fileField(Function<File, File> browseFunction)
+	{
+		return fileField(null, "...", browseFunction, null);
+	}
+	
 	/* ==================================================================== */
 
 	/**
@@ -504,6 +905,33 @@ public final class FormFactory
 	/* ==================================================================== */
 
 	/**
+	 * Creates a value converter component for text fields that use a string represent a value.
+	 * @param <T> the final field type.
+	 * @param valueFromTextFunction the function called to convert to the value from the text input.
+	 * @param textFromValueFunction the function called to convert to text from the value input.
+	 * @return a value converter to use with a form text field.
+	 */
+	public static <T> JValueConverter<T> converter(final Function<String, T> valueFromTextFunction, final Function<T, String> textFromValueFunction)
+	{
+		return new JValueConverter<T>() 
+		{
+			@Override
+			public T getValueFromText(String text) 
+			{
+				return valueFromTextFunction.apply(text);
+			}
+
+			@Override
+			public String getTextFromValue(T value) 
+			{
+				return textFromValueFunction.apply(value);
+			}
+		};
+	}
+	
+	/* ==================================================================== */
+
+	/**
 	 * A single form.
 	 */
 	public static class JFormPanel extends JPanel
@@ -516,7 +944,9 @@ public final class FormFactory
 		public enum LabelSide
 		{
 			LEFT,
-			RIGHT;
+			RIGHT,
+			LEADING,
+			TRAILING;
 		}
 
 		/** 
@@ -555,8 +985,20 @@ public final class FormFactory
 
 		/**
 		 * Adds a field to this form panel.
-		 * @param <V>
-		 * @param key the the object key to fetch/set values with.
+		 * @param <V> the field value type.
+		 * @param labelText the form label text.
+		 * @param field the field to set for the form.
+		 * @return this panel.
+		 */
+		public <V> JFormPanel addField(String labelText, JFormField<V> field)
+		{
+			return addField(null, labelText, field);
+		}
+		
+		/**
+		 * Adds a field to this form panel.
+		 * @param <V> the field value type.
+		 * @param key the the object key to fetch/set values with (if not null).
 		 * @param labelText the form label text.
 		 * @param field the field to set for the form.
 		 * @return this panel.
@@ -579,7 +1021,8 @@ public final class FormFactory
 					panel = new JFormFieldPanel<>(field, label);
 					break;
 			}
-			fieldValueMap.put(key, panel);
+			if (key != null)
+				fieldValueMap.put(key, panel);
 			add(panel);
 			return this;
 		}
@@ -716,24 +1159,21 @@ public final class FormFactory
 	 * A field with a button for "browsing" for a value to set.
 	 * @param <T> the value type.
 	 */
-	public static abstract class JValueBrowseField<T> extends JValueTextField<T>
+	public static class JValueBrowseField<T> extends JValueTextField<T>
 	{
 		private static final long serialVersionUID = 7171922756771225976L;
 		
-		private JValueTextField<T> field;
-
 		/**
 		 * Creates a new browse field.
-		 * @param field the text value field.
+		 * @param initialValue the initial value.
 		 * @param browseText the browse button text.
-		 * @param browseSupplier the browse value function. 
+		 * @param browseFunction the browse value function. 
+		 * @param converter the converter for the text field value.
+		 * @param changeListener the listener to call when a value changes.
 		 */
-		private JValueBrowseField(JValueTextField<T> field, String browseText, final Supplier<T> browseSupplier)
+		protected JValueBrowseField(T initialValue, String browseText, final Function<T, T> browseFunction, JValueConverter<T> converter, JValueChangeListener<T> changeListener)
 		{
-			super();
-			setLayout(new BorderLayout());
-			
-			add(this.field = field, BorderLayout.CENTER);
+			super(initialValue, converter, changeListener);
 			add(new JButton(new AbstractAction(browseText)
 			{
 				private static final long serialVersionUID = -7785265067430010139L;
@@ -742,23 +1182,11 @@ public final class FormFactory
 				public void actionPerformed(ActionEvent e) 
 				{
 					T value;
-					if ((value = browseSupplier.get()) != null)
+					if ((value = browseFunction.apply(JValueBrowseField.this.getValue())) != null)
 						setValue(value);
 				}
 				
 			}), BorderLayout.EAST);
-		}
-		
-		@Override
-		public T getValue()
-		{
-			return field.getValue();
-		}
-	
-		@Override
-		public void setValue(Object value) 
-		{
-			field.setValue(value);
 		}
 		
 	}
@@ -767,7 +1195,7 @@ public final class FormFactory
 	 * A text field that is the representation of a greater value.
 	 * @param <T> the type that this field stores.
 	 */
-	public static abstract class JValueTextField<T> extends JFormField<T>
+	public static class JValueTextField<T> extends JFormField<T>
 	{
 		private static final long serialVersionUID = -8674796823012708679L;
 		
@@ -775,38 +1203,23 @@ public final class FormFactory
 		private Object value;
 		/** The stored value. */
 		private JTextField textField;
+		/** The converter. */
+		private JValueConverter<T> converter;
+		/** The change listener. */
+		private JValueChangeListener<T> changeListener;
 		
 		/**
 		 * Creates a new text field.
 		 * @param initialValue the initial value.
+		 * @param converter the converter for the text field value.
+		 * @param changeListener the listener to call when a value changes.
 		 */
-		private JValueTextField(T initialValue)
+		protected JValueTextField(T initialValue, JValueConverter<T> converter, JValueChangeListener<T> changeListener)
 		{
-			this();
-			setValue(initialValue);
-		}
-		
-		/**
-		 * Creates a new text field.
-		 */
-		public JValueTextField()
-		{
+			this.converter = Objects.requireNonNull(converter);
+			this.changeListener = changeListener;
+	
 			this.textField = new JTextField();
-			this.textField.addFocusListener(new FocusAdapter()
-			{
-				@Override
-				public void focusGained(FocusEvent e) 
-				{
-					textField.selectAll();
-				}
-				
-				@Override
-				public void focusLost(FocusEvent e) 
-				{
-					refreshValue();
-				}
-			});
-			
 			this.textField.addKeyListener(new KeyAdapter() 
 			{
 				@Override
@@ -823,11 +1236,84 @@ public final class FormFactory
 					}
 				}
 			});
+			this.textField.addFocusListener(new FocusAdapter()
+			{
+				@Override
+				public void focusGained(FocusEvent e) 
+				{
+					textField.selectAll();
+				}
+				
+				@Override
+				public void focusLost(FocusEvent e) 
+				{
+					refreshValue();
+				}
+			});
 			
 			setLayout(new BorderLayout());
 			add(BorderLayout.CENTER, this.textField);
+			setValue(initialValue);
 		}
 		
+		/**
+		 * Sets the value from text.
+		 * @param text the text to set.
+		 */
+		public void setText(String text)
+		{
+			setValue(converter.getValueFromText(text));
+		}
+	
+		@Override
+		@SuppressWarnings("unchecked")
+		public T getValue()
+		{
+			return (T)value;
+		}
+		
+		@Override
+		public void setValue(T value)
+		{
+			this.value = value;
+			textField.setText(converter.getTextFromValue((T)value));
+			if (changeListener != null)
+				changeListener.onChange(value);
+		}
+		
+		// Refreshes an entered value.
+		private void refreshValue()
+		{
+			setValue(converter.getValueFromText(textField.getText()));
+		}
+		
+		private void restoreValue()
+		{
+			setValue(getValue());
+		}
+		
+	}
+
+	/**
+	 * A listener that is called when a value changes on a 
+	 * @param <T> the field value type.
+	 */
+	@FunctionalInterface
+	public static interface JValueChangeListener<T>
+	{
+		/**
+		 * Called when the value on the form changes.
+		 * @param value the new value.
+		 */
+		void onChange(T value);
+	}
+	
+	/**
+	 * A common interface for fields that convert values to and from text.
+	 * @param <T> the object type that this converts.
+	 */
+	public static interface JValueConverter<T>
+	{
 		/**
 		 * Parses text for the value to set on this field.
 		 * @param text the value to set.
@@ -841,71 +1327,6 @@ public final class FormFactory
 		 * @return the resultant value.
 		 */
 		public abstract String getTextFromValue(T value);
-
-		/**
-		 * Sets the value from text.
-		 * @param text the text to set.
-		 */
-		public void setText(String text)
-		{
-			setValue(getValueFromText(text));
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public T getValue()
-		{
-			return (T)value;
-		}
-		
-		@Override
-		@SuppressWarnings("unchecked")
-		public void setValue(Object value)
-		{
-			this.value = value;
-			textField.setText(getTextFromValue((T)value));
-		}
-		
-		// Refreshes an entered value.
-		private void refreshValue()
-		{
-			setValue(getValueFromText(textField.getText()));
-		}
-		
-		private void restoreValue()
-		{
-			setValue(getValue());
-		}
-		
 	}
 
-	// Custom field.
-	private static class CustomValueTextField<T> extends JValueTextField<T>
-	{
-		private static final long serialVersionUID = -8634356294849795162L;
-		
-		private Function<String, T> toValueConverter;
-		private Function<T, String> toStringConverter;
-		
-		private CustomValueTextField(T initialValue, Function<String, T> toValueConverter, Function<T, String> toStringConverter)
-		{
-			super();
-			this.toValueConverter = toValueConverter;
-			this.toStringConverter = toStringConverter;
-			setValue(initialValue);
-		}
-		
-		@Override
-		public T getValueFromText(String value)
-		{
-			return toValueConverter.apply(value);
-		}
-
-		@Override
-		public String getTextFromValue(T value)
-		{
-			return toStringConverter.apply(value);
-		}
-	}
-	
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Black Rook Software
+ * Copyright (c) 2019-2021 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -278,7 +278,7 @@ public final class SwingUtils
 	 */
 	public static File file(Component parent, File initPath, String approveText, FileFilter ... choosableFilters)
 	{
-		return file(parent, null, null, approveText, choosableFilters);
+		return file(parent, null, initPath, approveText, choosableFilters);
 	}
 
 	/**
