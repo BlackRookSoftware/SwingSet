@@ -24,7 +24,7 @@ redistributed in whole or in part.
 ### Why?
 
 Let's face facts - GUI programming is the worst. This library tries to reduce most of the tedium, 
-but you'll still be doing GUI programming.
+but you'll still be doing GUI programming. Sorry.
 
 
 ### Library
