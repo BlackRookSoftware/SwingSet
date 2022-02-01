@@ -596,7 +596,7 @@ public final class FormFactory
 						return null;
 					return new File(text);
 				},
-				(value) -> value.exists() ? value.getAbsolutePath() : value.getPath()
+				(value) -> value != null ? (value.exists() ? value.getAbsolutePath() : value.getPath()) : ""
 			), 
 			changeListener
 		);
