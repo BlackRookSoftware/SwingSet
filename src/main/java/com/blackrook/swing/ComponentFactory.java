@@ -33,6 +33,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -46,6 +47,7 @@ import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerListModel;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -225,7 +227,7 @@ public final class ComponentFactory
 	 * @param action the action on the button.
 	 * @return a new button.
 	 */
-	public static JButton button(int mnemonic, Action action)
+	public static JButton button(int mnemonic, AbstractAction action)
 	{
 		JButton out = new JButton(action);
 		if (mnemonic > 0)
@@ -238,7 +240,7 @@ public final class ComponentFactory
 	 * @param action the action on the button.
 	 * @return a new button.
 	 */
-	public static JButton button(Action action)
+	public static JButton button(AbstractAction action)
 	{
 		return button(0, action);
 	}
@@ -620,6 +622,29 @@ public final class ComponentFactory
 		return new JTextField();
 	}
 
+	/* ==================================================================== */
+	/* ==== Progress Bars                                              ==== */
+	/* ==================================================================== */
+
+	/**
+	 * Creates a new progress bar with a default model.
+	 * @param orientation the {@link JProgressBar} orientation.
+	 * @return the new progress bar.
+	 */
+	public static JProgressBar progressBar(int orientation)
+	{
+		return new JProgressBar(orientation);
+	}
+	
+	/**
+	 * Creates a new progress bar with a default model and horizontal orientation.
+	 * @return the new progress bar.
+	 */
+	public static JProgressBar progressBar()
+	{
+		return progressBar(SwingConstants.HORIZONTAL);
+	}
+	
 	/* ==================================================================== */
 	/* ==== Spinners                                                   ==== */
 	/* ==================================================================== */
@@ -1872,7 +1897,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a new action.
 	 */
-	public static Action action(Icon icon, String label, ActionEventHandler handler)
+	public static AbstractAction action(Icon icon, String label, ActionEventHandler handler)
 	{
 		return new HandledAction(icon, label, handler);
 	}
@@ -1883,7 +1908,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a new action.
 	 */
-	public static Action action(String label, ActionEventHandler handler)
+	public static AbstractAction action(String label, ActionEventHandler handler)
 	{
 		return new HandledAction(null, label, handler);
 	}
@@ -1894,7 +1919,7 @@ public final class ComponentFactory
 	 * @param handler the code called when the action is triggered.
 	 * @return a new action.
 	 */
-	public static Action action(Icon icon, ActionEventHandler handler)
+	public static AbstractAction action(Icon icon, ActionEventHandler handler)
 	{
 		return new HandledAction(icon, null, handler);
 	}
