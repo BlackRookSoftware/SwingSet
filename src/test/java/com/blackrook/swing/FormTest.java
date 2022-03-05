@@ -34,11 +34,7 @@ public final class FormTest
 		;
 		
 		JFrame f = frame("Test",
-			containerOf(
-				node(new BorderLayout(),
-					node(BorderLayout.CENTER, form)
-				)
-			)
+			containerOf(node(BorderLayout.CENTER, form))
 		);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setVisible(true);

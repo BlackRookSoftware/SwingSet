@@ -37,11 +37,12 @@ public final class RasterCanvasTest
 		final RasterCanvas canvas;
 		
 		JFrame f = frame("Test",
-			containerOf(node(new Dimension(640, 480), new BorderLayout(),
+			containerOf(new Dimension(640, 480), new BorderLayout(),
 				node(BorderLayout.CENTER, canvas = new RasterCanvas(2, 2, true))
-			))
+			)
 		);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f.pack();
 
 		final Point out = new Point();
 		canvas.addMouseMotionListener(new MouseMotionAdapter()

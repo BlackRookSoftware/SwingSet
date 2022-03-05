@@ -10,12 +10,13 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JSlider;
 import javax.swing.border.BevelBorder;
+
+import static javax.swing.BorderFactory.*;
 
 import static com.blackrook.swing.SwingUtils.*;
 import static com.blackrook.swing.ContainerFactory.*;
@@ -59,22 +60,19 @@ public final class TreeSwingTest
 					)
 				)
 			),
-			containerOf(
-				node(new Dimension(256, 256), new BorderLayout(),
-					node(BorderLayout.NORTH, button("OK", BUTTON_NAME_PRINTER)),
-					node(BorderLayout.CENTER, new FlowLayout(),
-						node(apply(shortTextField((short)0, false), (s)->{
-							s.setPreferredSize(new Dimension(100, 20));
-						})),
-						node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
-						node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
-						node(
-							BorderFactory.createBevelBorder(BevelBorder.LOWERED),
-							node(textField("this is stuff"))
-						)
-					),
-					node(BorderLayout.SOUTH, button("Cancel", BUTTON_NAME_PRINTER))
-				)
+			containerOf(new Dimension(256, 256), new BorderLayout(),
+				node(BorderLayout.NORTH, button("OK", BUTTON_NAME_PRINTER)),
+				node(BorderLayout.CENTER, containerOf(new FlowLayout(),
+					node(apply(shortTextField((short)0, false), (s)->{
+						s.setPreferredSize(new Dimension(100, 20));
+					})),
+					node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
+					node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
+					node(containerOf(createBevelBorder(BevelBorder.LOWERED),
+						node(textField("this is stuff"))
+					))
+				)),
+				node(BorderLayout.SOUTH, button("Cancel", BUTTON_NAME_PRINTER))
 			)
 		);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
