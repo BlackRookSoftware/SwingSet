@@ -372,6 +372,18 @@ public final class ContainerFactory
 	}
 
 	/**
+	 * Creates a new {@link Dimension}.
+	 * The intent behind this shallow function is to unify the grammar used to build containers via this factory. 
+	 * @param width the dimension width.
+	 * @param height the dimension height.
+	 * @return a new dimension.
+	 */
+	public static Dimension dimension(int width, int height)
+	{
+		return new Dimension(width, height);
+	}
+	
+	/**
 	 * A component node.
 	 */
 	public static class Node
@@ -910,14 +922,27 @@ public final class ContainerFactory
 			button.setMnemonic(choice.mnemonic);
 			nodes[i] = node(button);
 		}
-		modal.setContentPane(containerOf(createEmptyBorder(4, 4, 4, 4),
-			node(BorderLayout.CENTER, containerOf(createEmptyBorder(4, 4, 4, 4), 
-				node(contentPane)
-			)),
-			node(BorderLayout.SOUTH, containerOf(createEmptyBorder(4, 4, 4, 4), new FlowLayout(FlowLayout.TRAILING, 4, 0), 
-				nodes
-			))
+		
+		Node[] modalSections;
+		Node contentNode = node(BorderLayout.CENTER, containerOf(createEmptyBorder(4, 4, 4, 4), 
+			node(contentPane)
 		));
+		
+		if (nodes.length > 0) 
+		{
+			modalSections = new Node[]{
+				contentNode,
+				node(BorderLayout.SOUTH, containerOf(createEmptyBorder(4, 4, 4, 4), new FlowLayout(FlowLayout.TRAILING, 4, 0), 
+					nodes
+				))
+			};
+		}
+		else
+		{
+			modalSections = new Node[]{contentNode};
+		}
+		
+		modal.setContentPane(containerOf(createEmptyBorder(4, 4, 4, 4), modalSections));
 		modal.setLocationByPlatform(true);
 		modal.pack();
 		modal.setMinimumSize(modal.getSize());

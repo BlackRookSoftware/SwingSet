@@ -45,15 +45,15 @@ public final class TreeSwingTest
 		JFrame f = frame("Test",
 			menuBar(
 				menu("File", KeyEvent.VK_F,
-					item("New", KeyEvent.VK_N, PRINT_MENUITEM_NAME),
-					item("Open", KeyEvent.VK_O, PRINT_MENUITEM_NAME),
+					menuItem("New", KeyEvent.VK_N, PRINT_MENUITEM_NAME),
+					menuItem("Open", KeyEvent.VK_O, PRINT_MENUITEM_NAME),
 					separator(),
-					item("Exit", KeyEvent.VK_X, PRINT_MENUITEM_NAME)
+					menuItem("Exit", KeyEvent.VK_X, PRINT_MENUITEM_NAME)
 				),
 				menu("Edit", KeyEvent.VK_E,
-					item("Stuff", KeyEvent.VK_S,
-						item("Junk", KeyEvent.VK_J, PRINT_MENUITEM_NAME),
-						item("Crud", KeyEvent.VK_C, PRINT_MENUITEM_NAME),
+					menuItem("Stuff", KeyEvent.VK_S,
+						menuItem("Junk", KeyEvent.VK_J, PRINT_MENUITEM_NAME),
+						menuItem("Crud", KeyEvent.VK_C, PRINT_MENUITEM_NAME),
 						checkBoxItem("Option", false, KeyEvent.VK_O, (item, e)->{
 							System.out.println(item.getState());
 						})
