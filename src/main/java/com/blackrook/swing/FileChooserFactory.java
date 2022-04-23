@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2019-2022 Black Rook Software
+ * This program and the accompanying materials are made available under 
+ * the terms of the MIT License, which accompanies this distribution.
+ ******************************************************************************/
 package com.blackrook.swing;
 
 import java.awt.Component;
@@ -32,7 +37,10 @@ public final class FileChooserFactory
 			jfc.setDialogTitle(title);
 		jfc.resetChoosableFileFilters();
 		for (FileFilter filter : choosableFilters)
+		{
 			jfc.addChoosableFileFilter(filter);
+			jfc.setFileFilter(filter);
+		}
 		switch (jfc.showDialog(parent, approveText))
 		{
 			default:
@@ -101,7 +109,10 @@ public final class FileChooserFactory
 			jfc.setDialogTitle(title);
 		jfc.resetChoosableFileFilters();
 		for (FileFilter filter : choosableFilters)
+		{
 			jfc.addChoosableFileFilter(filter);
+			jfc.setFileFilter(filter);
+		}
 		switch (jfc.showDialog(parent, approveText))
 		{
 			default:
