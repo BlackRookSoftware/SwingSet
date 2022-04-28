@@ -63,7 +63,7 @@ public final class TreeSwingTest
 			containerOf(new Dimension(256, 256), new BorderLayout(),
 				node(BorderLayout.NORTH, button("OK", BUTTON_NAME_PRINTER)),
 				node(BorderLayout.CENTER, containerOf(new FlowLayout(),
-					node(apply(shortTextField((short)0, false), (s)->{
+					node(apply(shortField((short)0, false), (s)->{
 						s.setPreferredSize(new Dimension(100, 20));
 					})),
 					node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
