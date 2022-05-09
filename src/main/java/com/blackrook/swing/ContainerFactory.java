@@ -127,18 +127,6 @@ public final class ContainerFactory
 	/* ==================================================================== */
 
 	/**
-	 * Starts a container layout tree, returns a component.
-	 * @param border the border to set on the container.
-	 * @param layout the layout to use for this tree's children.
-	 * @param children the component's children.
-	 * @return a component that is the result of creating the tree.
-	 */
-	public static Container containerOf(Border border, LayoutManager layout, Node ... children)
-	{
-		return containerOf(new JPanel(), null, border, layout, children);
-	}
-
-	/**
 	 * Starts a layout tree, returning the provided container.
 	 * The layout is replaced on it with the provided layout.
 	 * @param container the root container.
@@ -294,6 +282,18 @@ public final class ContainerFactory
 	public static Container containerOf(Dimension preferredSize, Node ... children)
 	{
 		return containerOf(new JPanel(), preferredSize, null, new BorderLayout(), children);
+	}
+
+	/**
+	 * Starts a container layout tree, returns a component.
+	 * @param border the border to set on the container.
+	 * @param layout the layout to use for this tree's children.
+	 * @param children the component's children.
+	 * @return a component that is the result of creating the tree.
+	 */
+	public static Container containerOf(Border border, LayoutManager layout, Node ... children)
+	{
+		return containerOf(new JPanel(), null, border, layout, children);
 	}
 
 	/**
