@@ -813,7 +813,7 @@ public final class FormFactory
 	 */
 	public static JFormField<KeyStroke> keyStrokeField(KeyStroke initialValue, Function<KeyStroke, KeyStroke> transformer)
 	{
-		return new JValueKeystrokeField(initialValue, transformer, null);
+		return keyStrokeField(initialValue, transformer, null);
 	}	
 	
 	/**
@@ -829,16 +829,103 @@ public final class FormFactory
 	/* ==================================================================== */
 
 	/**
-	 * 
-	 * @param initialValue
-	 * @param browseText
-	 * @param browseTitle
-	 * @param changeListener
+	 * Creates a new color field with a color picker button.
+	 * @param initialValue the field's initial value.
+	 * @param alpha if true, support alpha channel.
+	 * @param browseText the browse button text.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the new color selection field.
+	 */
+	public static JFormField<Color> colorField(Color initialValue, boolean alpha, String browseText, String browseTitle, JValueChangeListener<Color> changeListener)
+	{
+		return new JValueColorField(initialValue, alpha, browseText, browseTitle, changeListener);
+	}
+	
+	/**
+	 * Creates a new color field with a color picker button, no alpha channel support.
+	 * @param initialValue the field's initial value.
+	 * @param alpha if true, support alpha channel.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the new color selection field.
+	 */
+	public static JFormField<Color> colorField(Color initialValue, boolean alpha, String browseTitle, JValueChangeListener<Color> changeListener)
+	{
+		return colorField(initialValue, alpha, "...", browseTitle, changeListener);
+	}
+	
+	/**
+	 * Creates a new color field with a color picker button, no alpha channel support.
+	 * @param initialValue the field's initial value.
+	 * @param alpha if true, support alpha channel.
+	 * @param browseText the browse button text.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @return the new color selection field.
+	 */
+	public static JFormField<Color> colorField(Color initialValue, boolean alpha, String browseText, String browseTitle)
+	{
+		return colorField(initialValue, alpha, browseText, browseTitle, null);
+	}
+	
+	/**
+	 * Creates a new color field with a color picker button, no alpha channel support.
+	 * @param initialValue the field's initial value.
+	 * @param alpha if true, support alpha channel.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @return the new color selection field.
+	 */
+	public static JFormField<Color> colorField(Color initialValue, boolean alpha, String browseTitle)
+	{
+		return colorField(initialValue, alpha, "...", browseTitle, null);
+	}
+	
+	/**
+	 * Creates a new color field with a color picker button, no alpha channel support.
+	 * @param initialValue the field's initial value.
+	 * @param browseText the browse button text.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @param changeListener the listener to use when a value change occurs.
 	 * @return the new color selection field.
 	 */
 	public static JFormField<Color> colorField(Color initialValue, String browseText, String browseTitle, JValueChangeListener<Color> changeListener)
 	{
-		return new JValueColorField(initialValue, browseText, browseTitle, changeListener);
+		return colorField(initialValue, false, browseText, browseTitle, changeListener);
+	}
+	
+	/**
+	 * Creates a new color field with a color picker button, no alpha channel support.
+	 * @param initialValue the field's initial value.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @param changeListener the listener to use when a value change occurs.
+	 * @return the new color selection field.
+	 */
+	public static JFormField<Color> colorField(Color initialValue, String browseTitle, JValueChangeListener<Color> changeListener)
+	{
+		return colorField(initialValue, false, "...", browseTitle, changeListener);
+	}
+	
+	/**
+	 * Creates a new color field with a color picker button, no alpha channel support.
+	 * @param initialValue the field's initial value.
+	 * @param browseText the browse button text.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @return the new color selection field.
+	 */
+	public static JFormField<Color> colorField(Color initialValue, String browseText, String browseTitle)
+	{
+		return colorField(initialValue, false, browseText, browseTitle, null);
+	}
+	
+	/**
+	 * Creates a new color field with a color picker button, no alpha channel support.
+	 * @param initialValue the field's initial value.
+	 * @param browseTitle the title of the color picker dialog.
+	 * @return the new color selection field.
+	 */
+	public static JFormField<Color> colorField(Color initialValue, String browseTitle)
+	{
+		return colorField(initialValue, false, "...", browseTitle, null);
 	}
 	
 	/* ==================================================================== */
@@ -1640,11 +1727,11 @@ public final class FormFactory
 		/** Preview panel. */
 		private PreviewPanel previewPanel;
 		
-		protected JValueColorField(Color initialValue, final String browseText, final String browseTitle, JValueChangeListener<Color> changeListener)
+		protected JValueColorField(Color initialValue, final boolean alpha, final String browseText, final String browseTitle, JValueChangeListener<Color> changeListener)
 		{
 			super(initialValue, converter(
-				(text) -> convertToColor(text), 
-				(color) -> convertToText(color)
+				(text) -> convertToColor(alpha, text), 
+				(color) -> convertToText(alpha, color)
 			), changeListener);
 			
 			final JValueColorField SELF = this;
@@ -1671,6 +1758,7 @@ public final class FormFactory
 			add(controls, BorderLayout.LINE_END);
 		}
 		
+		@Override
 		public void setValue(Color value) 
 		{
 			super.setValue(value);
@@ -1685,7 +1773,7 @@ public final class FormFactory
 			browseButton.setEnabled(enabled);
 		}
 		
-		private static Color convertToColor(String text)
+		private static Color convertToColor(boolean alpha, String text)
 		{
 			try {
 				long argb = Long.parseLong(text, 16);
@@ -1700,7 +1788,7 @@ public final class FormFactory
 			}
 		}
 
-		private static String convertToText(Color color)
+		private static String convertToText(boolean alpha, Color color)
 		{
 	        StringBuilder sb = new StringBuilder(Integer.toHexString(color.getRGB() & 0xffffffff));
 			while (sb.length() < 8) 
@@ -1718,9 +1806,19 @@ public final class FormFactory
 				final int width = getWidth();
 				final int height = getHeight();
 				Color prev = g.getColor();
-				g.setColor(getValue());
-				g.fillRect(0, 0, width, height);
-				g.setColor(prev);
+				Color current = getValue();
+				if (current != null)
+				{
+					g.setColor(getValue());
+					g.fillRect(0, 0, width, height);
+					g.setColor(prev);
+				}
+				else
+				{
+					g.setColor(new Color(0, 0, 0, 0));
+					g.fillRect(0, 0, width, height);
+					g.setColor(prev);
+				}
 			}
 		}
 		
