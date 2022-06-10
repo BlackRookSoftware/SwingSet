@@ -4,6 +4,8 @@ import java.awt.event.KeyEvent;
 
 import static com.blackrook.swing.ContainerFactory.*;
 import static com.blackrook.swing.ComponentFactory.*;
+import static com.blackrook.swing.ModalFactory.*;
+
 
 public final class ModalTest 
 {
