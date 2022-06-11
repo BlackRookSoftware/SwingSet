@@ -18,7 +18,6 @@ import javax.swing.border.BevelBorder;
 
 import static javax.swing.BorderFactory.*;
 
-import static com.blackrook.swing.SwingUtils.*;
 import static com.blackrook.swing.ContainerFactory.*;
 import static com.blackrook.swing.ComponentFactory.*;
 import static com.blackrook.swing.FormFactory.*;
@@ -63,9 +62,7 @@ public final class TreeSwingTest
 			containerOf(new Dimension(256, 256), new BorderLayout(),
 				node(BorderLayout.NORTH, button("OK", BUTTON_NAME_PRINTER)),
 				node(BorderLayout.CENTER, containerOf(new FlowLayout(),
-					node(apply(shortField((short)0, false), (s)->{
-						s.setPreferredSize(new Dimension(100, 20));
-					})),
+					node(dimension(100, 20), (shortField((short)0, false))),
 					node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
 					node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
 					node(containerOf(createBevelBorder(BevelBorder.LOWERED),

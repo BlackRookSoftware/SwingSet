@@ -6,12 +6,10 @@
 package com.blackrook.swing;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 
 import javax.swing.JFrame;
 import javax.swing.JSlider;
 
-import static com.blackrook.swing.SwingUtils.*;
 import static com.blackrook.swing.ContainerFactory.*;
 import static com.blackrook.swing.ComponentFactory.*;
 import static com.blackrook.swing.FormFactory.*;
@@ -22,10 +20,9 @@ public final class FormTest
 	{
 		SwingUtils.setSystemLAF();
 		
-		Dimension d = new Dimension(256, 20);
-		JSlider slider1 = apply(slider(sliderModel(50, 0, 0, 100)), (s) -> {s.setPreferredSize(d);});
-		JSlider slider2 = apply(slider(sliderModel(50, 0, 0, 100)), (s) -> {s.setPreferredSize(d);});
-		JSlider slider3 = apply(slider(sliderModel(50, 0, 0, 100)), (s) -> {s.setPreferredSize(d);});
+		JSlider slider1 = slider(sliderModel(50, 0, 0, 100));
+		JSlider slider2 = slider(sliderModel(50, 0, 0, 100));
+		JSlider slider3 = slider(sliderModel(50, 0, 0, 100));
 		
 		JFormPanel form = form(JFormPanel.LabelSide.LEFT, JFormPanel.LabelJustification.LEFT, 128)
 			.addField(0, "Junk", sliderField(slider1))
