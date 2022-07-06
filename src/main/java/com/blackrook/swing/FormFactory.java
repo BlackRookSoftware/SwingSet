@@ -9,6 +9,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
@@ -19,7 +20,10 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -52,6 +56,7 @@ import static javax.swing.BorderFactory.*;
  */
 public final class FormFactory
 {
+	// Don't instantiate.
 	private FormFactory() {}
 	
 	/**
@@ -1314,6 +1319,97 @@ public final class FormFactory
 		};
 	}
 	
+	/**
+	 * Creates a form field that is a series of buttons.
+	 * No value is held, nor set.
+	 * @param buttons the buttons to encapsulate.
+	 * @return a new form field that encapsulates a set of buttons.
+	 */
+	public static JFormField<Void> buttonField(final JButton ... buttons)
+	{
+		return new JFormField<Void>()
+		{
+			private static final long serialVersionUID = -7511474019499338246L;
+			
+			private JPanel field;
+			private List<JButton> buttonList;
+			
+			{
+				setLayout(new BorderLayout());
+				JPanel panel = new JPanel();
+				panel.setLayout(new FlowLayout(FlowLayout.LEADING));
+				for (int i = 0; i < buttons.length; i++)
+					panel.add(buttons[i]);
+				this.buttonList = Collections.unmodifiableList(Arrays.asList(buttons));
+				add(BorderLayout.LINE_START, this.field = panel);
+			}
+			
+			@Override
+			public void setEnabled(boolean enabled) 
+			{
+				super.setEnabled(enabled);
+				for (JButton button : buttonList)
+					button.setEnabled(enabled);
+			}
+			
+			@Override
+			public Void getValue()
+			{
+				return null;
+			}
+
+			@Override
+			public void setValue(Void value)
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			protected Component getFormComponent()
+			{
+				return field;
+			}
+		};
+	}
+	
+	/**
+	 * Creates a form field that is a blank space.
+	 * No value is held, nor set.
+	 * @return a new form field.
+	 */
+	public static JFormField<Void> separatorField()
+	{
+		return new JFormField<Void>()
+		{
+			private static final long serialVersionUID = -7511474019499338246L;
+			
+			private JPanel field;
+			
+			{
+				setLayout(new BorderLayout());
+				add(BorderLayout.CENTER, this.field = new JPanel());
+			}
+			
+			@Override
+			public Void getValue()
+			{
+				return null;
+			}
+
+			@Override
+			public void setValue(Void value)
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			protected Component getFormComponent()
+			{
+				return field;
+			}
+		};
+	}
+	
 	/* ==================================================================== */
 	
 	/**
@@ -1328,8 +1424,6 @@ public final class FormFactory
 		return new JFormPanel(labelSide, labelJustification, labelWidth);
 	}
 	
-	/* ==================================================================== */
-
 	/**
 	 * Creates a form panel where the label side matches the justification.
 	 * @param labelSide the label side.
@@ -1411,10 +1505,18 @@ public final class FormFactory
 		 */
 		public enum LabelSide
 		{
-			LEFT,
-			RIGHT,
-			LEADING,
-			TRAILING;
+			LEFT(BorderLayout.WEST),
+			RIGHT(BorderLayout.EAST),
+			LEADING(BorderLayout.LINE_START),
+			TRAILING(BorderLayout.LINE_END);
+
+			private String constraint;
+			
+			private LabelSide(String constraint)
+			{
+				this.constraint = constraint;
+			}
+			
 		}
 
 		/** 
@@ -1444,13 +1546,24 @@ public final class FormFactory
 		
 		private JFormPanel(LabelSide labelSide, LabelJustification labelJustification, int labelWidth)
 		{
-			this.labelSide = labelSide;
+			this.labelSide = labelSide != null ? labelSide : LabelSide.LEADING;
 			this.labelJustification = labelJustification;
 			this.labelWidth = labelWidth;
 			this.fieldValueMap = new HashMap<>();
 			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		}
 
+		/**
+		 * Adds a field to this form panel with no label.
+		 * @param <V> the field value type.
+		 * @param field the field to set for the form.
+		 * @return this panel.
+		 */
+		public <V> JFormPanel addField(JFormField<V> field)
+		{
+			return addTipField(null, "", null, field);
+		}
+		
 		/**
 		 * Adds a field to this form panel.
 		 * @param <V> the field value type.
@@ -1460,7 +1573,7 @@ public final class FormFactory
 		 */
 		public <V> JFormPanel addField(String labelText, JFormField<V> field)
 		{
-			return addField(null, labelText, field);
+			return addTipField(null, labelText, null, field);
 		}
 		
 		/**
@@ -1473,24 +1586,48 @@ public final class FormFactory
 		 */
 		public <V> JFormPanel addField(Object key, String labelText, JFormField<V> field)
 		{
-			JFormFieldPanel<V> panel;
+			return addTipField(key, labelText, null, field);
+		}
+
+		/**
+		 * Adds a field to this form panel.
+		 * @param <V> the field value type.
+		 * @param labelText the form label text.
+		 * @param toolTipText the tool tip text. Can be null.
+		 * @param field the field to set for the form.
+		 * @return this panel.
+		 */
+		public <V> JFormPanel addTipField(String labelText, String toolTipText, JFormField<V> field)
+		{
+			return addTipField(null, labelText, toolTipText, field);
+		}
+		
+		/**
+		 * Adds a field to this form panel.
+		 * @param <V> the field value type.
+		 * @param key the the object key to fetch/set values with (if not null).
+		 * @param labelText the form label text.
+		 * @param toolTipText the tool tip text. Can be null.
+		 * @param field the field to set for the form.
+		 * @return this panel.
+		 */
+		public <V> JFormPanel addTipField(Object key, String labelText, String toolTipText, JFormField<V> field)
+		{
 			JLabel label = new JLabel(labelText);
 			label.setHorizontalAlignment(labelJustification.alignment);
 			label.setVerticalAlignment(JLabel.CENTER);
 			label.setPreferredSize(new Dimension(labelWidth, 0));
-			
-			switch (labelSide)
+			JFormFieldPanel<V> panel = new JFormFieldPanel<>(label, field, labelSide.constraint);
+			if (toolTipText != null)
 			{
-				default:
-				case LEFT:
-					panel = new JFormFieldPanel<>(label, field);
-					break;
-				case RIGHT:
-					panel = new JFormFieldPanel<>(field, label);
-					break;
+				label.setToolTipText(toolTipText);
+				Component formInput = field.getFormInputComponent();
+				if (formInput instanceof JComponent)
+					((JComponent)formInput).setToolTipText(toolTipText);
 			}
 			if (key != null)
 				fieldValueMap.put(key, panel);
+			
 			add(panel);
 			return this;
 		}
@@ -1551,7 +1688,7 @@ public final class FormFactory
 	}
 	
 	/**
-	 * Input field interface used for the Black Rook Swing input components.
+	 * Input field class used for the Black Rook Swing input components.
 	 * @param <V> the type of value stored by this field.
 	 */
 	public static abstract class JFormField<V> extends JPanel
@@ -1563,6 +1700,18 @@ public final class FormFactory
 		{
 			super.setEnabled(enabled);
 			getFormComponent().setEnabled(enabled);
+		}
+		
+		@Override
+		public void requestFocus()
+		{
+			getFormComponent().requestFocus();
+		}
+		
+		@Override
+		public boolean requestFocusInWindow() 
+		{
+			return getFormComponent().requestFocusInWindow();
 		}
 		
 		/**
@@ -1582,6 +1731,14 @@ public final class FormFactory
 		 */
 		protected abstract Component getFormComponent();
 
+		/**
+		 * Gets the reference to this field's form component explicitly used for user input.
+		 * @return the component.
+		 */
+		protected Component getFormInputComponent()
+		{
+			return getFormComponent();
+		}
 	}
 
 	/**
@@ -1595,22 +1752,13 @@ public final class FormFactory
 		private JLabel label;
 		private JFormField<T> formField;
 		
-		private JFormFieldPanel(JLabel label, JFormField<T> field)
+		private JFormFieldPanel(JLabel label, JFormField<T> field, String borderLayoutConstraint)
 		{
 			super();
-			setBorder(createEmptyBorder(4, 4, 4, 4));
+			setBorder(createEmptyBorder(4, 0, 4, 0));
 			setLayout(new BorderLayout(4, 0));
-			add(this.label = label, BorderLayout.WEST);
+			add(this.label = label, borderLayoutConstraint);
 			add(this.formField = field, BorderLayout.CENTER);
-		}
-		
-		private JFormFieldPanel(JFormField<T> field, JLabel label)
-		{
-			super();
-			setBorder(createEmptyBorder(2, 2, 2, 2));
-			setLayout(new BorderLayout());
-			add(this.formField = field, BorderLayout.CENTER);
-			add(this.label = label, BorderLayout.EAST);
 		}
 		
 		/**
@@ -1647,6 +1795,7 @@ public final class FormFactory
 		{
 			return formField;
 		}
+
 	}
 
 	/**
@@ -1692,6 +1841,11 @@ public final class FormFactory
 			browseButton.setEnabled(enabled);
 		}
 		
+		@Override
+		protected Component getFormInputComponent() 
+		{
+			return getFormComponent();
+		}
 	}
 	
 	/**
