@@ -11,6 +11,9 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -18,6 +21,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -46,6 +50,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.TransferHandler;
 
 import static javax.swing.BorderFactory.*;
 
@@ -945,7 +950,7 @@ public final class FormFactory
 	 */
 	public static JFormField<File> fileField(File initialValue, String browseText, Function<File, File> browseFunction, JValueChangeListener<File> changeListener)
 	{
-		return valueBrowseTextField(initialValue, browseText, browseFunction, 
+		JFormField<File> out = valueBrowseTextField(initialValue, browseText, browseFunction, 
 			converter(
 				(text) -> {
 					text = text.trim();
@@ -957,6 +962,8 @@ public final class FormFactory
 			), 
 			changeListener
 		);
+		((JComponent)out.getFormInputComponent()).setTransferHandler(new FileDropTransferHandler(out));
+		return out;
 	}
 	
 	/**
@@ -1337,7 +1344,7 @@ public final class FormFactory
 			{
 				setLayout(new BorderLayout());
 				JPanel panel = new JPanel();
-				panel.setLayout(new FlowLayout(FlowLayout.LEADING));
+				panel.setLayout(new FlowLayout(FlowLayout.LEADING, 2, 2));
 				for (int i = 0; i < buttons.length; i++)
 					panel.add(buttons[i]);
 				this.buttonList = Collections.unmodifiableList(Arrays.asList(buttons));
@@ -1388,6 +1395,45 @@ public final class FormFactory
 			{
 				setLayout(new BorderLayout());
 				add(BorderLayout.CENTER, this.field = new JPanel());
+			}
+			
+			@Override
+			public Void getValue()
+			{
+				return null;
+			}
+
+			@Override
+			public void setValue(Void value)
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			protected Component getFormComponent()
+			{
+				return field;
+			}
+		};
+	}
+	
+	/**
+	 * Creates a form panel space that is aligned to the form section.
+	 * No value is held, nor set.
+	 * @param panel the panel to set.
+	 * @return a new form field.
+	 */
+	public static JFormField<Void> panelField(final JPanel panel)
+	{
+		return new JFormField<Void>()
+		{
+			private static final long serialVersionUID = -4652707139878678731L;
+			
+			private JPanel field;
+			
+			{
+				setLayout(new BorderLayout());
+				add(BorderLayout.CENTER, this.field = panel);
 			}
 			
 			@Override
@@ -2187,6 +2233,48 @@ public final class FormFactory
 		
 	}
 
+	// File Drop Handler.
+	private static class FileDropTransferHandler extends TransferHandler
+	{
+		private static final long serialVersionUID = -6288814694018204679L;
+		
+		private JFormField<File> fileField;
+		
+		private FileDropTransferHandler(JFormField<File> fileField)
+		{
+			this.fileField = fileField;
+			
+		}
+		
+		@Override
+		public boolean canImport(TransferSupport support) 
+		{
+			return support.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
+		}
+		
+		@Override
+		@SuppressWarnings("unchecked")
+		public boolean importData(TransferSupport support) 
+		{
+			if (!support.isDrop())
+				return false;
+			
+			Transferable transferable = support.getTransferable();
+			List<File> files;
+			try {
+				files = (List<File>)transferable.getTransferData(DataFlavor.javaFileListFlavor);
+			} catch (UnsupportedFlavorException | IOException e) {
+				return false;
+			}
+			
+			if (!files.isEmpty())
+				fileField.setValue(files.get(files.size() - 1));
+			
+			return true;
+		}
+		
+	}
+	
 	/**
 	 * A listener that is called when a value changes on a 
 	 * @param <T> the field value type.
