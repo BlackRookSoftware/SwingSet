@@ -10,9 +10,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.KeyEvent;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JMenuItem;
 import javax.swing.JSlider;
 import javax.swing.border.BevelBorder;
 
@@ -28,11 +26,11 @@ public final class TreeSwingTest
 	{
 		SwingUtils.setSystemLAF();
 		
-		ComponentActionHandler<JMenuItem> PRINT_MENUITEM_NAME = (x, e)->{
+		MenuItemClickHandler PRINT_MENUITEM_NAME = (x)->{
 			System.out.println(x.getText());
 		};
 		
-		ComponentActionHandler<JButton> BUTTON_NAME_PRINTER = (b, e)->{
+		ButtonClickHandler BUTTON_NAME_PRINTER = (b)->{
 			System.out.println(b.getText());
 		};
 		
@@ -53,8 +51,8 @@ public final class TreeSwingTest
 					menuItem("Stuff", KeyEvent.VK_S,
 						menuItem("Junk", KeyEvent.VK_J, PRINT_MENUITEM_NAME),
 						menuItem("Crud", KeyEvent.VK_C, PRINT_MENUITEM_NAME),
-						checkBoxItem("Option", false, KeyEvent.VK_O, (item, e)->{
-							System.out.println(item.getState());
+						checkBoxItem("Option", false, KeyEvent.VK_O, (v)->{
+							System.out.println(v.isSelected());
 						})
 					)
 				)

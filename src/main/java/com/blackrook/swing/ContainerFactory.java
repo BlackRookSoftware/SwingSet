@@ -771,7 +771,7 @@ public final class ContainerFactory
 		if (icon != null)
 			out.setIconImage(icon);
 		if (menuBar != null)
-			out.add(menuBar);
+			out.setJMenuBar(menuBar);
 		out.setContentPane(content);
 		out.setLocationByPlatform(true);
 		out.pack();
