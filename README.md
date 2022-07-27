@@ -1,7 +1,7 @@
-# Black Rook Swing Factory
+# Black Rook Swing Set
 
-Copyright (c) 2019-2021 Black Rook Software.  
-[https://github.com/BlackRookSoftware/Swing](https://github.com/BlackRookSoftware/Swing)
+Copyright (c) 2019-2022 Black Rook Software.  
+[https://github.com/BlackRookSoftware/SwingSet](https://github.com/BlackRookSoftware/SwingSet)
 
 ### Required Libraries
 
