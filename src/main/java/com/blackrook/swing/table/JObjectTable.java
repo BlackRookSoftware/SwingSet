@@ -313,7 +313,6 @@ public class JObjectTable<T> extends JTable
 						col.order = td.order();
 						col.sortable = td.sortable();
 						col.editable = td.editable() && col.setterMethod != null;
-						col.tip = td.tip().trim().length() > 0 ? td.tip() : null;
 						columnList.add(col);
 					}
 				}
@@ -518,7 +517,7 @@ public class JObjectTable<T> extends JTable
 		 * @param method the method to inspect.
 		 * @return true if so, false if not.
 		 */
-		private boolean isGetter(Method method)
+		private static boolean isGetter(Method method)
 		{
 			return isGetterName(method.getName()) 
 				&& method.getParameterTypes().length == 0
@@ -531,7 +530,7 @@ public class JObjectTable<T> extends JTable
 		 * @param methodName the name of the method.
 		 * @return true if so, false if not.
 		 */
-		private boolean isSetterName(String methodName)
+		private static boolean isSetterName(String methodName)
 		{
 			if (methodName.startsWith("set"))
 			{
@@ -548,7 +547,7 @@ public class JObjectTable<T> extends JTable
 		 * @param methodName the name of the method.
 		 * @return true if so, false if not.
 		 */
-		private boolean isGetterName(String methodName)
+		private static boolean isGetterName(String methodName)
 		{
 			if (methodName.startsWith("is"))
 			{
@@ -568,7 +567,7 @@ public class JObjectTable<T> extends JTable
 		}
 
 		// truncator method
-		private String truncateMethodName(String methodName, boolean is)
+		private static String truncateMethodName(String methodName, boolean is)
 		{
 			return is 
 				? Character.toLowerCase(methodName.charAt(2)) + methodName.substring(3)
@@ -585,7 +584,7 @@ public class JObjectTable<T> extends JTable
 		 * @throws StringIndexOutOfBoundsException if name is the empty string.
 		 * @throws NullPointerException if name is null.
 		 */
-		private String getSetterName(String name)
+		private static String getSetterName(String name)
 		{
 			return "set" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
 		}
@@ -599,7 +598,7 @@ public class JObjectTable<T> extends JTable
 		 * @param methodName the name of the method.
 		 * @return the modified method name.
 		 */
-		private String getFieldName(String methodName)
+		private static String getFieldName(String methodName)
 		{
 			if (isGetterName(methodName))
 			{
@@ -626,7 +625,7 @@ public class JObjectTable<T> extends JTable
 		 * @throws RuntimeException if anything goes wrong (bad target, bad argument, or can't access the method).
 		 * @see Method#invoke(Object, Object...)
 		 */
-		private Object invokeBlind(Method method, Object instance, Object ... params)
+		private static Object invokeBlind(Method method, Object instance, Object ... params)
 		{
 			Object out = null;
 			try {
@@ -646,14 +645,12 @@ public class JObjectTable<T> extends JTable
 		/**
 		 * Descriptor column.
 		 */
-		public final class Column
+		private final class Column
 		{
 			/** Nice name. */
 			private String name;
 			/** Order key. */
 			private int order;
-			/** Column tooltip. */
-			private String tip;
 			/** Sortable? */
 			private boolean sortable;
 			/** Editable? */
