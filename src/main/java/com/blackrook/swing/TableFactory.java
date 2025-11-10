@@ -642,7 +642,7 @@ public final class TableFactory
 			}
 			else
 			{
-				fireUpdateEvent(0, amount);
+				fireUpdateEvent(0, amount - 1);
 			}
 		}
 		
