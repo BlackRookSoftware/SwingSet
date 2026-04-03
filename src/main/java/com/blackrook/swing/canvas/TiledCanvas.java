@@ -344,33 +344,37 @@ public class TiledCanvas extends Canvas
 	 */
 	protected void updateIndividualLayer(int layerId) 
 	{
-		Graphics2D g2d = fetchLayerImage(layerId).createGraphics();
-		TileModel model = layerModels[layerId];
-
-		int tileOffsetX = offsetX / tileWidth;
-		int tileOffsetY = offsetY / tileHeight;
-		int tilesX = getWidth() / tileWidth;
-		int tilesY = getHeight() / tileHeight;
-		
-		g2d.setBackground(BLANK_COLOR);
-		g2d.clearRect(0, 0, getWidth(), getHeight());
-		g2d.setComposite(LAYER_COMPOSITE);
-		
-		for (int i = -1; i <= tilesX; i++)
+		VolatileImage layerImage = fetchLayerImage(layerId);
+		if (layerImage != null)
 		{
-			for (int j = -1; j <= tilesY; j++)
+			Graphics2D g2d = layerImage.createGraphics();
+			TileModel model = layerModels[layerId];
+
+			int tileOffsetX = offsetX / tileWidth;
+			int tileOffsetY = offsetY / tileHeight;
+			int tilesX = getWidth() / tileWidth;
+			int tilesY = getHeight() / tileHeight;
+			
+			g2d.setBackground(BLANK_COLOR);
+			g2d.clearRect(0, 0, getWidth(), getHeight());
+			g2d.setComposite(LAYER_COMPOSITE);
+			
+			for (int i = -1; i <= tilesX; i++)
 			{
-				Image tileImage = model.getImageForTile(i + tileOffsetX, j + tileOffsetY);
-				if (tileImage == null)
-					continue;
-				g2d.drawImage(tileImage, 
-					(-offsetX % tileWidth) + (i * tileWidth), 
-					(-offsetY % tileHeight) + (j * tileHeight), 
-					tileWidth, tileHeight, null
-				);
+				for (int j = -1; j <= tilesY; j++)
+				{
+					Image tileImage = model.getImageForTile(i + tileOffsetX, j + tileOffsetY);
+					if (tileImage == null)
+						continue;
+					g2d.drawImage(tileImage, 
+						(-offsetX % tileWidth) + (i * tileWidth), 
+						(-offsetY % tileHeight) + (j * tileHeight), 
+						tileWidth, tileHeight, null
+					);
+				}
 			}
+			g2d.dispose();
 		}
-		g2d.dispose();
 	}
 
 	/**
@@ -378,20 +382,24 @@ public class TiledCanvas extends Canvas
 	 */
 	protected void updateGridLayer()
 	{
-		Graphics2D g2d = fetchGridLayerImage().createGraphics();
-		g2d.setBackground(BLANK_COLOR);
-		g2d.clearRect(0, 0, getWidth(), getHeight());
-		g2d.setComposite(LAYER_COMPOSITE);
+		VolatileImage layerImage = fetchGridLayerImage();
+		if (layerImage != null)
+		{
+			Graphics2D g2d = layerImage.createGraphics();
+			g2d.setBackground(BLANK_COLOR);
+			g2d.clearRect(0, 0, getWidth(), getHeight());
+			g2d.setComposite(LAYER_COMPOSITE);
 
-		g2d.setColor(gridColor);
-		int x = -(offsetX % tileWidth) - 1;
-		int y = -(offsetY % tileHeight) - 1;
-		for (; x < getWidth(); x += tileWidth)
-			g2d.drawLine(x, 0, x, getHeight());
-		for (; y < getHeight(); y += tileHeight)
-			g2d.drawLine(0, y, getWidth(), y);
-		
-		g2d.dispose();
+			g2d.setColor(gridColor);
+			int x = -(offsetX % tileWidth) - 1;
+			int y = -(offsetY % tileHeight) - 1;
+			for (; x < getWidth(); x += tileWidth)
+				g2d.drawLine(x, 0, x, getHeight());
+			for (; y < getHeight(); y += tileHeight)
+				g2d.drawLine(0, y, getWidth(), y);
+			
+			g2d.dispose();
+		}		
 	}
 	
 	/**
@@ -430,19 +438,21 @@ public class TiledCanvas extends Canvas
 	public void paint(Graphics g) 
 	{
 		canvasBuffer = recreateVolatileImage(canvasBuffer, getWidth(), getHeight(), Transparency.OPAQUE);
-		
-		Graphics2D g2d = canvasBuffer.createGraphics();
-		g2d.setBackground(getBackground());
-		g2d.clearRect(0, 0, getWidth(), getHeight());
-		g2d.setComposite(LAYER_COMPOSITE);
-		for (int i = 0; i < layerImages.length; i++)
-			if (layerVisibility[i])
-				g2d.drawImage(layerImages[i], 0, 0, null);
-		if (gridDrawn)
-			g2d.drawImage(gridLayer, 0, 0, null);
-		g2d.dispose();
-		
-		g.drawImage(canvasBuffer, 0, 0, null);
+		if (canvasBuffer != null)
+		{
+			Graphics2D g2d = canvasBuffer.createGraphics();
+			g2d.setBackground(getBackground());
+			g2d.clearRect(0, 0, getWidth(), getHeight());
+			g2d.setComposite(LAYER_COMPOSITE);
+			for (int i = 0; i < layerImages.length; i++)
+				if (layerVisibility[i])
+					g2d.drawImage(layerImages[i], 0, 0, null);
+			if (gridDrawn)
+				g2d.drawImage(gridLayer, 0, 0, null);
+			g2d.dispose();
+			
+			g.drawImage(canvasBuffer, 0, 0, null);
+		}
 	}
 	
 	/**
