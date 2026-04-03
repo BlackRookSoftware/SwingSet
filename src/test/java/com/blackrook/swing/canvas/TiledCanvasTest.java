@@ -9,8 +9,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -43,15 +41,6 @@ public final class TiledCanvasTest
 		f.pack();
 
 		final Point out = new Point();
-		canvas.addComponentListener(new ComponentAdapter() 
-		{
-			@Override
-			public void componentResized(ComponentEvent e) 
-			{
-				canvas.repaint();
-			}
-		});
-		
 		ControlAdapter controlAdapter = new ControlAdapter() 
 		{
 			private int lastX = -1;
