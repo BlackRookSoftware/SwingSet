@@ -285,7 +285,7 @@ public class TiledCanvas extends Canvas
 	/**
 	 * Gets a tile model on this canvas.
 	 * @param layerId the layer id.
-	 * @returns the corresponding model.
+	 * @return the corresponding model.
 	 * @throws ArrayIndexOutOfBoundsException if layerId &lt; 0 or &gt;= {@link #getLayerCount()}. 
 	 */
 	public TileModel getTileModel(int layerId)
@@ -471,6 +471,7 @@ public class TiledCanvas extends Canvas
 
 	/**
 	 * A default tile model that holds data and tiles.
+	 * @param <T> the data type.
 	 */
 	public static class DefaultTileModel<T> implements TileModel
 	{
