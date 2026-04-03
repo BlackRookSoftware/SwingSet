@@ -13,6 +13,7 @@ import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.awt.Transparency;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
@@ -20,6 +21,7 @@ import java.awt.image.VolatileImage;
 import java.awt.image.WritableRaster;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 /**
  * Image processing utility library.
@@ -28,6 +30,21 @@ public final class ImageUtils
 {
 	private ImageUtils() {}
 
+	/**
+	 * A simple image builder.
+	 * @param width the width of the image.
+	 * @param height the height of the image.
+	 * @param bufferedImageType the BufferedImage type id.
+	 * @param builder the builder function.
+	 * @return the image, after the builder function is executed.
+	 */
+	public static BufferedImage imageBuilder(int width, int height, int bufferedImageType, Consumer<BufferedImage> builder)
+	{
+		BufferedImage image = new BufferedImage(width, height, bufferedImageType);
+		builder.accept(image);
+		return image;
+	}
+	
 	/**
 	 * Creates/Recreates a new volatile image.
 	 * A new VolatileImage, compatible with the current local graphics environment is returned
