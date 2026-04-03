@@ -5,6 +5,7 @@
  ******************************************************************************/
 package com.blackrook.swing.canvas;
 
+import java.awt.AlphaComposite;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -32,6 +33,9 @@ public class TiledCanvas extends Canvas
 	/** The blank color for clearing canvases. */
 	protected static final Color BLANK_COLOR = new Color(0, 0, 0, 0);
 	
+	/** The composite function to use for the layers. */
+	protected static final AlphaComposite LAYER_COMPOSITE = AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
+	
 	/** The width of each tile in pixels. */
 	private int tileWidth;
 	/** The height of each tile in pixels. */
@@ -48,11 +52,17 @@ public class TiledCanvas extends Canvas
 
 	/** The set of images that make up the layers. */
 	private VolatileImage layerImages[];
-	/** The image that makes up the grid layer. */
-	private VolatileImage gridLayer;
+	/** The visibility status of the layers. */
+	private boolean layerVisibility[];
 	/** The set of images that make up the layers. */
 	private TileModel layerModels[];
 
+	/** The image that makes up the grid layer. */
+	private VolatileImage gridLayer;
+
+	/** Intermediate canvas buffer. */
+	private VolatileImage canvasBuffer;
+	
 	/**
 	 * Creates a new TiledCanvas made of the provided layers.
 	 * The layers are drawn from first to last, the last being the topmost rendered.
@@ -72,7 +82,12 @@ public class TiledCanvas extends Canvas
 		this.gridColor = Color.BLACK;
 		
 		this.layerImages = new VolatileImage[tileModels.length];
+		this.layerVisibility = new boolean[tileModels.length];
+		Arrays.fill(layerVisibility, true);
 		this.layerModels = Arrays.copyOf(tileModels, tileModels.length);
+		
+		this.gridLayer = null;
+		this.canvasBuffer = null;
 		
 		addComponentListener(new ComponentAdapter() 
 		{
@@ -127,11 +142,13 @@ public class TiledCanvas extends Canvas
 	/**
 	 * Sets the grid offset, X-axis, in pixels.
 	 * Positive values adjust the grid to the left, negative to the right.
+	 * Changing this value repaints the canvas.
 	 * @param offsetX the new X offset in pixels.
 	 */
 	public void setOffsetX(int offsetX) 
 	{
 		this.offsetX = offsetX;
+		refresh();
 	}
 
 	/**
@@ -145,11 +162,13 @@ public class TiledCanvas extends Canvas
 	/**
 	 * Sets the grid offset, Y-axis, in pixels.
 	 * Positive values adjust the grid upwards, negative downwards.
+	 * Changing this value repaints the canvas.
 	 * @param offsetY the new Y offset in pixels.
 	 */
 	public void setOffsetY(int offsetY) 
 	{
 		this.offsetY = offsetY;
+		refresh();
 	}
 	
 	/**
@@ -161,11 +180,50 @@ public class TiledCanvas extends Canvas
 	}
 	
 	/**
+	 * Translates the offsets of the canvas in pixels.
+	 * Changing this value repaints the canvas.
+	 * @param x the amount of pixels, x-axis.
+	 * @param y the amount of pixels, y-axis.
+	 */
+	public void translate(int x, int y)
+	{
+		this.offsetX += x;
+		this.offsetY += y;
+		refresh();
+	}
+	
+	/**
 	 * @return the amount of layers in this canvas.
 	 */
 	public int getLayerCount()
 	{
-		return layerImages.length;
+		return layerModels.length;
+	}
+	
+	/**
+	 * Sets the visibility flag on a layer.
+	 * Changing this value repaints the canvas.
+	 * @param layerId the layer id.
+	 * @param visible true if visible, false if not.
+	 * @throws ArrayIndexOutOfBoundsException if layerId &lt; 0 or &gt;= {@link #getLayerCount()}. 
+	 */
+	public void setLayerVisibility(int layerId, boolean visible)
+	{
+		boolean prevVisible = this.layerVisibility[layerId]; 
+		this.layerVisibility[layerId] = visible;
+		if (prevVisible ^ visible)
+			repaint();
+	}
+	
+	/**
+	 * Gets the visibility flag on a layer.
+	 * @param layerId the layer id.
+	 * @return true if visible, false if not.
+	 * @throws ArrayIndexOutOfBoundsException if layerId &lt; 0 or &gt;= {@link #getLayerCount()}. 
+	 */
+	public boolean getLayerVisibility(int layerId)
+	{
+		return layerVisibility[layerId];
 	}
 	
 	/**
@@ -179,6 +237,7 @@ public class TiledCanvas extends Canvas
 	
 	/**
 	 * Sets if the grid is drawn.
+	 * Changing this value repaints the canvas.
 	 * @param gridDrawn true if so, false if not.
 	 */
 	public void setGridDrawn(boolean gridDrawn) 
@@ -200,16 +259,38 @@ public class TiledCanvas extends Canvas
 	}
 	
 	/**
+	 * Gets the grid color (if drawn).
+	 * Default is {@link Color#BLACK}.
+	 * @return the current grid color.
+	 */
+	public Color getGridColor()
+	{
+		return gridColor;
+	}
+	
+	/**
 	 * Replaces a tile model on this canvas.
+	 * Changing this value repaints the canvas.
 	 * @param layerId the layer id.
 	 * @param model the model to set.
 	 * @throws ArrayIndexOutOfBoundsException if layerId &lt; 0 or &gt;= {@link #getLayerCount()}. 
 	 */
-	public void setModel(int layerId, TileModel model)
+	public void setTileModel(int layerId, TileModel model)
 	{
 		this.layerModels[layerId] = model;
 		updateIndividualLayer(layerId);
 		repaint();
+	}
+	
+	/**
+	 * Gets a tile model on this canvas.
+	 * @param layerId the layer id.
+	 * @returns the corresponding model.
+	 * @throws ArrayIndexOutOfBoundsException if layerId &lt; 0 or &gt;= {@link #getLayerCount()}. 
+	 */
+	public TileModel getTileModel(int layerId)
+	{
+		return this.layerModels[layerId];
 	}
 	
 	/**
@@ -218,10 +299,10 @@ public class TiledCanvas extends Canvas
 	 * @param canvasY the canvas Y-coordinate.
 	 * @param tileCoords the output tile coordinates.
 	 */
-	public void getTileCoordinatesByCanvasCoodinates(int canvasX, int canvasY, Point tileCoords)
+	public void getTileCoordinatesByCanvasCoordinates(int canvasX, int canvasY, Point tileCoords)
 	{
-		tileCoords.x = (offsetX + canvasX) / tileWidth;
-		tileCoords.y = (offsetY + canvasY) / tileHeight;
+		tileCoords.x = ((offsetX + canvasX) < 0 ? (offsetX + canvasX - tileWidth) : (offsetX + canvasX)) / tileWidth;
+		tileCoords.y = ((offsetY + canvasY) < 0 ? (offsetY + canvasY - tileHeight) : (offsetY + canvasY)) / tileHeight;
 	}
 	
 	/**
@@ -229,9 +310,9 @@ public class TiledCanvas extends Canvas
 	 * @param inPoint the canvas coordinates.
 	 * @param tileCoords the output point.
 	 */
-	public void getTileCoordinatesByCanvasCoodinates(Point inPoint, Point tileCoords)
+	public void getTileCoordinatesByCanvasCoordinates(Point inPoint, Point tileCoords)
 	{
-		getTileCoordinatesByCanvasCoodinates(inPoint.x, inPoint.y, tileCoords);
+		getTileCoordinatesByCanvasCoordinates(inPoint.x, inPoint.y, tileCoords);
 	}
 	
 	/**
@@ -273,10 +354,11 @@ public class TiledCanvas extends Canvas
 		
 		g2d.setBackground(BLANK_COLOR);
 		g2d.clearRect(0, 0, getWidth(), getHeight());
+		g2d.setComposite(LAYER_COMPOSITE);
 		
-		for (int i = 0; i <= tilesX; i++)
+		for (int i = -1; i <= tilesX; i++)
 		{
-			for (int j = 0; j <= tilesY; j++)
+			for (int j = -1; j <= tilesY; j++)
 			{
 				Image tileImage = model.getImageForTile(i + tileOffsetX, j + tileOffsetY);
 				if (tileImage == null)
@@ -299,11 +381,14 @@ public class TiledCanvas extends Canvas
 		Graphics2D g2d = fetchGridLayerImage().createGraphics();
 		g2d.setBackground(BLANK_COLOR);
 		g2d.clearRect(0, 0, getWidth(), getHeight());
+		g2d.setComposite(LAYER_COMPOSITE);
 
 		g2d.setColor(gridColor);
-		for (int x = (tileWidth - 1) - (offsetX % tileWidth); x < getWidth(); x += tileWidth)
+		int x = -(offsetX % tileWidth) - 1;
+		int y = -(offsetY % tileHeight) - 1;
+		for (; x < getWidth(); x += tileWidth)
 			g2d.drawLine(x, 0, x, getHeight());
-		for (int y = (tileHeight - 1) - (offsetY % tileHeight); y < getHeight(); y += tileHeight)
+		for (; y < getHeight(); y += tileHeight)
 			g2d.drawLine(0, y, getWidth(), y);
 		
 		g2d.dispose();
@@ -311,6 +396,8 @@ public class TiledCanvas extends Canvas
 	
 	/**
 	 * Updates a single layer and repaints the canvas.
+	 * Should be called upon updating a TileModel for a particular layer so
+	 * that the new results are visible.
 	 * @param layerId the layer to update.
 	 */
 	public final void refreshLayer(int layerId)
@@ -321,11 +408,14 @@ public class TiledCanvas extends Canvas
 	
 	/**
 	 * Updates all layers and repaints the canvas.
+	 * Should be called upon updating all TileModels so
+	 * that the new results are visible.
 	 */
 	public final void refresh()
 	{
 		for (int i = 0; i < getLayerCount(); i++)
 			updateIndividualLayer(i);
+		updateGridLayer();
 		repaint();
 	}
 	
@@ -339,12 +429,20 @@ public class TiledCanvas extends Canvas
 	@Override
 	public void paint(Graphics g) 
 	{
-		Graphics2D g2d = (Graphics2D)g;
+		canvasBuffer = recreateVolatileImage(canvasBuffer, getWidth(), getHeight(), Transparency.OPAQUE);
+		
+		Graphics2D g2d = canvasBuffer.createGraphics();
+		g2d.setBackground(getBackground());
+		g2d.clearRect(0, 0, getWidth(), getHeight());
+		g2d.setComposite(LAYER_COMPOSITE);
 		for (int i = 0; i < layerImages.length; i++)
-			g2d.drawImage(layerImages[i], 0, 0, null);
+			if (layerVisibility[i])
+				g2d.drawImage(layerImages[i], 0, 0, null);
 		if (gridDrawn)
 			g2d.drawImage(gridLayer, 0, 0, null);
 		g2d.dispose();
+		
+		g.drawImage(canvasBuffer, 0, 0, null);
 	}
 	
 	/**
@@ -364,14 +462,14 @@ public class TiledCanvas extends Canvas
 	/**
 	 * A default tile model that holds data and tiles.
 	 */
-	public static class DefaultTileModel implements TileModel
+	public static class DefaultTileModel<T> implements TileModel
 	{
 		private static final ThreadLocal<Point> TEMP_POINT = ThreadLocal.withInitial(() -> new Point());
 		
 		/** The data table. */
-		private Map<Point, Integer> dataTable;
+		private Map<Point, T> dataTable;
 		/** The data point to image map. */
-		private Map<Integer, Image> imageTable;
+		private Map<T, Image> imageTable;
 
 		public DefaultTileModel()
 		{
@@ -385,7 +483,7 @@ public class TiledCanvas extends Canvas
 		 * @param y the tile Y-coordinate.
 		 * @param data the data point.
 		 */
-		public void setData(int x, int y, Integer data)
+		public void setData(int x, int y, T data)
 		{
 			Point p = new Point(x, y);
 			dataTable.put(p, data);
@@ -396,7 +494,7 @@ public class TiledCanvas extends Canvas
 		 * @param data the data point.
 		 * @param image the image.
 		 */
-		public void setImage(Integer data, Image image)
+		public void setImage(T data, Image image)
 		{
 			imageTable.put(data, image);
 		}
@@ -406,8 +504,8 @@ public class TiledCanvas extends Canvas
 		{
 			Point p = TEMP_POINT.get();
 			p.setLocation(x, y);
-			Integer i = dataTable.get(p);
-			return i != null ? imageTable.get(i) : null;
+			T t = dataTable.get(p);
+			return t != null ? imageTable.get(t) : null;
 		}
 		
 	}
