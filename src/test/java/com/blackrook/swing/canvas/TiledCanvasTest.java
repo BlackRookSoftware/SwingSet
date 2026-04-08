@@ -64,6 +64,19 @@ public final class TiledCanvasTest
 					case KeyEvent.VK_1:
 						canvas.setLayerVisibility(1, !canvas.getLayerVisibility(1));
 						break;
+					case KeyEvent.VK_MINUS:
+					{
+						int tile = canvas.getTileWidth();
+						canvas.setTileSize(Math.max(tile / 2, 1), Math.max(tile / 2, 1));
+					}
+					break;
+
+					case KeyEvent.VK_EQUALS:
+					{
+						int tile = canvas.getTileWidth();
+						canvas.setTileSize(tile * 2, tile * 2);
+					}
+					break;
 				}
 			}
 			

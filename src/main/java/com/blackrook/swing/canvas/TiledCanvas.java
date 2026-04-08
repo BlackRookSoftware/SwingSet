@@ -140,6 +140,24 @@ public class TiledCanvas extends Canvas
 	}
 	
 	/**
+	 * Sets the size of a single tile in pixels.
+	 * Changing this value repaints the canvas.
+	 * @param width the width in pixels.
+	 * @param height the height in pixels.
+	 * @throws IllegalArgumentException if tileWidth &lt; 1 or tileHeight &lt; 1.
+	 */
+	public void setTileSize(int width, int height)
+	{
+		if (tileWidth < 1)
+			throw new IllegalArgumentException("tileWidth cannot be less than 1.");
+		if (tileHeight < 1)
+			throw new IllegalArgumentException("tileHeight cannot be less than 1.");
+		this.tileWidth = width;
+		this.tileHeight = height;
+		refresh();
+	}
+	
+	/**
 	 * Sets the grid offset, X-axis, in pixels.
 	 * Positive values adjust the grid to the left, negative to the right.
 	 * Changing this value repaints the canvas.
