@@ -8,6 +8,7 @@ package com.blackrook.swing.canvas;
 import java.awt.AlphaComposite;
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -56,6 +57,8 @@ public class TiledCanvas extends Canvas
 	private boolean layerVisibility[];
 	/** The set of images that make up the layers. */
 	private TileModel layerModels[];
+	/** The composites for each layer. */
+	private Composite layerComposites[];
 
 	/** The image that makes up the grid layer. */
 	private VolatileImage gridLayer;
@@ -84,6 +87,8 @@ public class TiledCanvas extends Canvas
 		this.layerImages = new VolatileImage[tileModels.length];
 		this.layerVisibility = new boolean[tileModels.length];
 		Arrays.fill(layerVisibility, true);
+		this.layerComposites = new Composite[tileModels.length];
+		Arrays.fill(layerComposites, LAYER_COMPOSITE);
 		this.layerModels = Arrays.copyOf(tileModels, tileModels.length);
 		
 		this.gridLayer = null;
@@ -242,6 +247,32 @@ public class TiledCanvas extends Canvas
 	public boolean getLayerVisibility(int layerId)
 	{
 		return layerVisibility[layerId];
+	}
+	
+	/**
+	 * Sets the composite for a layer.
+	 * Changing this value repaints the canvas.
+	 * @param layerId the layer id.
+	 * @param composite the layer composite.
+	 * @throws ArrayIndexOutOfBoundsException if layerId &lt; 0 or &gt;= {@link #getLayerCount()}. 
+	 */
+	public void setLayerComposite(int layerId, Composite composite)
+	{
+		Composite prevComposite = this.layerComposites[layerId]; 
+		this.layerComposites[layerId] = composite;
+		if (prevComposite != composite)
+			repaint();
+	}
+	
+	/**
+	 * Gets the composite for a layer.
+	 * @param layerId the layer id.
+	 * @return the layer composite.
+	 * @throws ArrayIndexOutOfBoundsException if layerId &lt; 0 or &gt;= {@link #getLayerCount()}. 
+	 */
+	public Composite getLayerComposite(int layerId)
+	{
+		return layerComposites[layerId];
 	}
 	
 	/**
@@ -461,10 +492,12 @@ public class TiledCanvas extends Canvas
 			Graphics2D g2d = canvasBuffer.createGraphics();
 			g2d.setBackground(getBackground());
 			g2d.clearRect(0, 0, getWidth(), getHeight());
-			g2d.setComposite(LAYER_COMPOSITE);
 			for (int i = 0; i < layerImages.length; i++)
 				if (layerVisibility[i])
+				{
+					g2d.setComposite(layerComposites[i]);
 					g2d.drawImage(layerImages[i], 0, 0, null);
+				}
 			if (gridDrawn)
 				g2d.drawImage(gridLayer, 0, 0, null);
 			g2d.dispose();

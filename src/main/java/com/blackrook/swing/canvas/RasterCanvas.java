@@ -319,10 +319,17 @@ public class RasterCanvas extends Canvas
 	@Override
 	public final void update(Graphics g)
 	{
+		// skip clear.
+		paint(g);
+	}
+	
+	@Override
+	public void paint(Graphics g) 
+	{
 		if (canvasBuffer != null)
 			((Graphics2D)g).drawImage(canvasBuffer, 0, 0, null);
 	}
-
+	
 	/**
 	 * Creates/Recreates a new volatile image.
 	 * A new VolatileImage, compatible with the current local graphics environment is returned
