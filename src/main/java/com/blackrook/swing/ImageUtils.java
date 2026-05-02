@@ -83,6 +83,23 @@ public final class ImageUtils
 	}
 
 	/**
+	 * Creates/Recreates a new buffered image that is compatible with this {@link GraphicsConfiguration}.
+	 * @param currentImage the previous VolatileImage to validate.
+	 * @param width the width of the new image.
+	 * @param height the height of the new image.
+	 * @param transparency the transparency mode (from {@link Transparency}).
+	 * @return a new or same BufferedImage.
+	 * @see GraphicsConfiguration#createCompatibleImage(int, int, int)
+	 */
+	public static BufferedImage reallocateImage(BufferedImage currentImage, int width, int height, int transparency)
+	{
+		GraphicsConfiguration gconfig = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+		if (currentImage == null || currentImage.getWidth() != width || currentImage.getHeight() != height || currentImage.getTransparency() != transparency)
+			currentImage = gconfig.createCompatibleImage(width, height, transparency);
+		return currentImage;
+	}
+	
+	/**
 	 * Creates/Recreates a new volatile image.
 	 * A new VolatileImage, compatible with the current local graphics environment is returned
 	 * if the current image passed into the method is invalid or incompatible. 
