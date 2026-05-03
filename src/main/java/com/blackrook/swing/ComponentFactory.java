@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2022 Black Rook Software
+ * Copyright (c) 2020-2026 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -1876,11 +1876,11 @@ public final class ComponentFactory
 	 * @param handler the listener to use for selection changes.
 	 * @return the list component.
 	 */
-	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, int selectionMode, final ListSelectionHandler<E> handler)
+	public static <E> JList<E> list(ListModel<E> model, ListCellRenderer<E> renderer, ListSelectionMode selectionMode, final ListSelectionHandler<E> handler)
 	{
 		final JList<E> out = new JList<>(model);
 		out.setCellRenderer(renderer);
-		out.setSelectionMode(selectionMode);
+		out.setSelectionMode(selectionMode.swingId);
 		out.getSelectionModel().addListSelectionListener(new ListSelectionListener() 
 		{
 			@Override
@@ -3021,5 +3021,9 @@ public final class ComponentFactory
 		}
 		
 	}
+
+	/* ==================================================================== */
+	/* ==== Checkboxes                                                 ==== */
+	/* ==================================================================== */
 
 }
