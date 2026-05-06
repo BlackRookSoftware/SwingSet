@@ -5,6 +5,7 @@
  ******************************************************************************/
 package com.blackrook.swing;
 
+import java.awt.Component;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -13,6 +14,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
@@ -22,6 +24,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -1868,6 +1871,27 @@ public final class ComponentFactory
 	}
 
 	/**
+	 * Creates a cell renderer that returns label text for an object type.
+	 * @param <E> the object type.
+	 * @param labelGetter the label fetching function per object.
+	 * @return a cell renderer for a list to strings.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <E> ListCellRenderer<E> listLabelRenderer(Function<E, String> labelGetter)
+	{
+		return (ListCellRenderer<E>) new DefaultListCellRenderer()
+		{
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) 
+			{
+				JLabel label = (JLabel)super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+				label.setText(labelGetter.apply((E)value));
+				return label;
+			}
+		};
+	}
+	
+	/**
 	 * Creates a list with a specific list model.
 	 * @param <E> the object type that the model contains.
 	 * @param model the list model.
@@ -3021,9 +3045,5 @@ public final class ComponentFactory
 		}
 		
 	}
-
-	/* ==================================================================== */
-	/* ==== Checkboxes                                                 ==== */
-	/* ==================================================================== */
 
 }
