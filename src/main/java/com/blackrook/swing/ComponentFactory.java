@@ -11,7 +11,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
@@ -550,6 +553,92 @@ public final class ComponentFactory
 		 * @param item the item clicked.
 		 */
 		void onClick(JRadioButtonMenuItem item);
+	}
+
+	/* ==================================================================== */
+	/* ==== Models                                                     ==== */
+	/* ==================================================================== */
+	
+	/**
+	 * An array model for lists.
+	 * @param <T> the element type.
+	 */
+	public static class ArrayListModel<T> implements ListModel<T>
+	{
+		private T[] arrayList;
+		private List<ListDataListener> listeners;
+
+		private ArrayListModel(T[] array)
+		{
+			this.arrayList = Arrays.copyOf(array, array.length);
+			this.listeners = Collections.synchronizedList(new ArrayList<>(4));
+		}
+
+		/**
+		 * Gets a copy of all elements in this model.
+		 * @return the elements.
+		 */
+		public T[] getAllElements()
+		{
+			return Arrays.copyOf(arrayList, arrayList.length);
+		}
+		
+		@Override
+		public int getSize()
+		{
+			return arrayList.length;
+		}
+		
+		public void setAllElements(T[] elements)
+		{
+			for (int i = 0; i < elements.length; i++)
+				arrayList[i] = elements[i];
+			listeners.forEach((listener) -> {
+				listener.intervalRemoved(
+					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, elements.length - 1)
+				);
+				listener.intervalAdded(
+					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, elements.length - 1)
+				);
+			});
+		}
+
+		/**
+		 * Sets an element at a place in the list.
+		 * @param index the index.
+		 * @param element the element to set.
+		 */
+		public void setElementAt(int index, T element)
+		{
+			arrayList[index] = element;
+			listeners.forEach((listener) -> {
+				listener.intervalRemoved(
+					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, index, index)
+				);
+				listener.intervalAdded(
+					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, index, index)
+				);
+			});
+		}
+		
+		@Override
+		public T getElementAt(int index)
+		{
+			return arrayList[index];
+		}
+
+		@Override
+		public void addListDataListener(ListDataListener l)
+		{
+			listeners.add(l);
+		}
+
+		@Override
+		public void removeListDataListener(ListDataListener l)
+		{
+			listeners.remove(l);
+		}
+		
 	}
 	
 	
@@ -1840,6 +1929,33 @@ public final class ComponentFactory
 	}
 
 	/**
+	 * Creates an array list model.
+	 * @param <M> the list model type.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @param handler the data handler to attach to the model (after the items are added, so that events are not fired to it).
+	 * @return the list component.
+	 */
+	public static <M extends ListModel<E>, E> ArrayListModel<E> listModel(E[] objects, ListDataHandler<M, E> handler)
+	{
+		ArrayListModel<E> out = new ArrayListModel<E>(objects);
+		out.addListDataListener(handler);
+		return out;
+	}
+
+	/**
+	 * Creates an array list model.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
+	 * @return the list component.
+	 */
+	public static <E> ArrayListModel<E> listModel(E[] objects)
+	{
+		ArrayListModel<E> out = new ArrayListModel<E>(objects);
+		return out;
+	}
+
+	/**
 	 * Creates a list model.
 	 * @param <M> the list model type.
 	 * @param <E> the object type that the model contains.
@@ -1847,7 +1963,7 @@ public final class ComponentFactory
 	 * @param handler the data handler to attach to the model (after the items are added, so that events are not fired to it).
 	 * @return the list component.
 	 */
-	public static <M extends ListModel<E>, E> ListModel<E> listModel(Collection<E> objects, ListDataHandler<M, E> handler)
+	public static <M extends ListModel<E>, E> DefaultListModel<E> listModel(Collection<E> objects, ListDataHandler<M, E> handler)
 	{
 		DefaultListModel<E> out = new DefaultListModel<E>();
 		for (E e : objects)
@@ -1862,7 +1978,7 @@ public final class ComponentFactory
 	 * @param objects the objects to put in the list model.
 	 * @return the list component.
 	 */
-	public static <E> ListModel<E> listModel(Collection<E> objects)
+	public static <E> DefaultListModel<E> listModel(Collection<E> objects)
 	{
 		DefaultListModel<E> out = new DefaultListModel<E>();
 		for (E e : objects)
