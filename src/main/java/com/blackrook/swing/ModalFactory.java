@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2025 Black Rook Software
+ * Copyright (c) 2019-2026 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -16,6 +16,7 @@ import java.awt.Image;
 import java.awt.Window;
 import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.function.Function;
@@ -25,8 +26,11 @@ import java.util.function.Supplier;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.KeyStroke;
 
 import static javax.swing.BorderFactory.*;
 
@@ -1347,6 +1351,16 @@ public final class ModalFactory
 		private Modal(Container owner)
 		{
 			super(getWindowForComponent(owner));
+			
+			final ActionListener closeAction = (e) ->
+			{
+				setVisible(false);
+				dispose();
+			};
+			
+			JRootPane rootPane = getRootPane();
+			KeyStroke escapeStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false);
+			rootPane.registerKeyboardAction(closeAction, escapeStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		}
 
 		private static Window getWindowForComponent(Component parent) throws HeadlessException 
