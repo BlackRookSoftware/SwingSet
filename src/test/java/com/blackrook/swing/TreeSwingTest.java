@@ -19,6 +19,7 @@ import static javax.swing.BorderFactory.*;
 import static com.blackrook.swing.ContainerFactory.*;
 import static com.blackrook.swing.ComponentFactory.*;
 import static com.blackrook.swing.FormFactory.*;
+import static com.blackrook.swing.FileChooserFactory.*;
 
 public final class TreeSwingTest
 {
@@ -65,6 +66,9 @@ public final class TreeSwingTest
 					node(slider(sliderModel(50, 0, 0, 100), SLIDER_VALUE_PRINTER)),
 					node(containerOf(createBevelBorder(BevelBorder.LOWERED),
 						node(textField("this is stuff"))
+					)),
+					node(containerOf(createBevelBorder(BevelBorder.LOWERED),
+						node(fileField("", (selected) -> chooseFile()))
 					))
 				)),
 				node(BorderLayout.SOUTH, button("Cancel", BUTTON_NAME_PRINTER))
