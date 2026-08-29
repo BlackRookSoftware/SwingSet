@@ -591,9 +591,9 @@ public final class ComponentFactory
 		private T[] arrayList;
 		private List<ListDataListener> listeners;
 
-		private ArrayListModel(T[] array)
+		private ArrayListModel(T[] array, int maxLength)
 		{
-			this.arrayList = Arrays.copyOf(array, array.length);
+			this.arrayList = Arrays.copyOf(array, maxLength);
 			this.listeners = Collections.synchronizedList(new ArrayList<>(4));
 		}
 
@@ -614,12 +614,41 @@ public final class ComponentFactory
 		
 		public void setAllElements(T[] elements)
 		{
-			for (int i = 0; i < elements.length; i++)
-				arrayList[i] = elements[i];
-			listeners.forEach((listener) -> {
-				listener.contentsChanged(
-					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, elements.length - 1)
-				);
+			final int origLen = arrayList.length;
+			arrayList = Arrays.copyOf(elements, elements.length);
+			final int newLen = arrayList.length;
+			listeners.forEach((listener) -> 
+			{
+				if (origLen < newLen)
+				{
+					if (origLen != 0)
+					{
+						listener.contentsChanged(
+							new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, origLen - 1)
+						);
+					}
+					listener.intervalAdded(
+						new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, origLen, newLen - 1)
+					);
+				}
+				else if (origLen > newLen)
+				{
+					if (newLen != 0)
+					{
+						listener.contentsChanged(
+							new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, newLen - 1)
+						);
+					}
+					listener.intervalRemoved(
+						new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, newLen, origLen - 1)
+					);
+				}
+				else
+				{
+					listener.contentsChanged(
+						new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, origLen - 1)
+					);
+				}
 			});
 		}
 
@@ -1987,11 +2016,23 @@ public final class ComponentFactory
 	 * Creates an array list model.
 	 * @param <E> the object type that the model contains.
 	 * @param objects the objects to put in the list model.
+	 * @param maxLength the maximum length of the array.
+	 * @return the list component.
+	 */
+	public static <E> ArrayListModel<E> listModel(E[] objects, int maxLength)
+	{
+		return new ArrayListModel<E>(objects, maxLength);
+	}
+
+	/**
+	 * Creates an array list model.
+	 * @param <E> the object type that the model contains.
+	 * @param objects the objects to put in the list model.
 	 * @return the list component.
 	 */
 	public static <E> ArrayListModel<E> listModel(E[] objects)
 	{
-		return new ArrayListModel<E>(objects);
+		return new ArrayListModel<E>(objects, objects.length);
 	}
 
 	/**
