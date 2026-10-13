@@ -356,6 +356,51 @@ public final class FormFactory
 	}
 
 	/**
+	 * Creates a new text field for a fixed-point value.
+	 * @param initialValue the field's initial value.
+	 * @param fractionBits the fraction/mantissa bits.
+	 * @param listener a listener for value changes.
+	 * @return a new form field that encapsulates a fixed-point integer.
+	 */
+	public static JFormField<Integer> fixedPointField(final int initialValue, final int fractionBits, JValueChangeListener<Integer> listener)
+	{
+		final int baseBits = 32 - fractionBits;
+		final int BASE_MASK = 0xffffffff >>> fractionBits;
+		final int FRACTION_MASK = 0xffffffff >>> baseBits;
+		
+		return valueTextField(initialValue,
+			converter(
+				(text) -> {
+					double d;
+					try {
+						d = Double.parseDouble(text);
+					} catch (NumberFormatException e) {
+						return 0;
+					}
+					
+					int b = BASE_MASK & ((int)d);
+					int m = (int)((d % 1.0) * (1 << fractionBits)) & FRACTION_MASK;
+					
+					return (b << fractionBits) | m;
+				},
+				(value) -> {
+					
+					if (value == null)
+						return "0.0";
+					
+					int b = (value & (BASE_MASK << fractionBits)) >> fractionBits;
+					int m = (value & FRACTION_MASK);
+					
+					double d = (double)b + ((double)m / (1 << fractionBits)); 
+					
+					return String.valueOf(d);
+				}
+			),
+			listener
+		);
+	}
+	
+	/**
 	 * Creates a new text field that stores a double type.
 	 * A blank value means null.
 	 * @param initialValue the field's initial value.
@@ -1794,7 +1839,7 @@ public final class FormFactory
 			{
 				Method m;
 				try {
-					m = field.getClass().getMethod("setValue", value.getClass());
+					m = field.getClass().getMethod("setValue", Object.class);
 					m.invoke(field, value);
 				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 					throw new ClassCastException("Could not set form field: " + e.getLocalizedMessage());
